@@ -32,7 +32,51 @@ function someFunction() {
 
 }
 
+function SaveSettingsButton() {
+  const saveSettings = () => {
+    const file = new Blob([JSON.stringify(settings)], {type: 'application/json'});
+    const url = URL.createObjectURL(file);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'settings.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  return (
+    <button onClick={saveSettings}>Save Settings</button>
+  );
+}
+function LoadSettingsButton() {
+  const loadSettings = (event) => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const newSettings = JSON.parse(event.target.result);
+      // Do something with newSettings
+    };
+    reader.readAsText(file);
+  }
+
+  return (
+    <div>
+      <input type="file" accept=".json" onChange={loadSettings} />
+      <label>Load Settings</label>
+    </div>
+  );
+}
+
 function App() {
+  function save() {
+
+  }
+
+
+
+
+
+
+
   // window.addEventListener("gamepadconnected", (event) => {
   //   console.log("A gamepad connected:");
   //   console.log(event.gamepad);
@@ -55,6 +99,7 @@ function App() {
   //    alert("Sorry, your browser doesn't support text to speech!");
   //  }
 
+  // TODO: Remove this, it's just to test one component
   return <ButtonGroupSettings  />
 
   return <Box
@@ -98,6 +143,7 @@ export function Layout() {
       </Box>
     </Box>
     
+    {/* TODO: Use ButtonGroupList instead? */}
     <ControlSchemeSetup />
     
     <ModeSetup />
