@@ -1,5 +1,4 @@
 import { Box, Button, Fade, Paper, Slide, Typography } from "@mui/material";
-// import { settings, actions } from "./Settings";
 import { KeyboardDoubleArrowLeftTwoTone, KeyboardDoubleArrowRightTwoTone } from "@mui/icons-material";
 import { useState } from "react";
 
@@ -9,55 +8,29 @@ export default function CommunicatorDisplay(props) {
   const [currentPhrase, setCurrentPhrase] = useState(0);
   const [currentVariation, setCurrentVariation] = useState(0);
 
-  // console.log("CommunicatorDisplay props:", props);
   const settings = props.settings;
   const setSettings = props.setSettings;
 
-  // const modes = ['mode 1', 'mode 2', 'mode 3'];
-  // const phrases = ['phrase 1', 'phrase 2', 'phrase 3'];
-  // const variations = ['variation 1', 'variation 2', 'variation 3'];
-
-  // const modes = settings.modes.map(mode => mode.name);
   const modes = settings.modes;
-  // const phrases = settings.modes[currentMode].phrases.map(phrase => phrase.name);
-  // const phrases = modes[currentMode].phrases;
-
   const phrases = modes[currentMode].phrases.map(phrase => {
     return settings.phrases.find(p => p.name === phrase);
   })
-  // const variations = settings.modes[currentMode].phrases[currentPhrase].variations.map(variation => variation.src ?? variation.speach);
   const variations = phrases[currentPhrase].variations;
 
   const setModeAndSpeak = (modeIndex) => {
-    // modeIndex = modeIndex % modes.length;
-    // const mode = settings.modes[modeIndex];
     const mode = modes[modeIndex];
 
     setState(modeIndex, 0, 0, mode?.name, null);
   };
   const setPhraseAndSpeak = (phraseIndex) => {
-    // phraseIndex = phraseIndex % phrases.length;
-    // const phrase = settings.modes[currentMode].phrases[phraseIndex];
     const phrase = phrases[phraseIndex];
-    setState(currentMode, phraseIndex, 0, phrase?.name, null);
 
-    // setCurrentPhrase(phrase);
-    // if (settings?.modes[currentMode]?.phrases[phrase]?.speach) {
-    //   speak(settings.modes[currentMode].phrases[phrase].speach);
-    // }
+    setState(currentMode, phraseIndex, 0, phrase?.name, null);
   };
   const setVariationAndSpeak = (variationIndex) => {
-    // variationIndex = variationIndex % variations.length;
-    // const variation = settings.modes[currentMode].phrases[currentPhrase].variations[variationIndex];
     const variation = variations[variationIndex];
 
     setState(currentMode, currentPhrase, variationIndex, variation?.name, variation?.src);
-
-    // setCurrentVariation(variation);
-    // // TODO: Don't speak if there's an audio file
-    // if (settings?.modes[currentMode]?.phrases[currentPhrase]?.variations[variation]?.speach) {
-    //   speak(settings.modes[currentMode].phrases[currentPhrase].variations[variation].speach);
-    // }
   };
 
   const setState = (mode, phrase, variation, speach, src) => {
@@ -83,26 +56,21 @@ export default function CommunicatorDisplay(props) {
   >
     <PrevNextDisplay
       title="Mode"
-      // items={modes}
       items={modes.map(mode => mode.name)}
       index={currentMode}
       setter={setModeAndSpeak}
-      // setter={setCurrentMode}
     />
     <PrevNextDisplay
       title="Phrase"
-      // items={phrases}
       items={phrases.map(phrase => phrase.name)}
       index={currentPhrase}
       setter={setPhraseAndSpeak}
-      // setter={setCurrentPhrase}
     />
     <PrevNextDisplay
       title="Variation"
       items={variations.map(variation => variation.name)}
       index={currentVariation}
       setter={setVariationAndSpeak}
-      // setter={setCurrentVariation}
     />
 
   </Box>
@@ -125,9 +93,6 @@ export function PrevNextDisplay(props) {
   return <Paper
     elevation={4}
     sx={{
-      // bgcolor: "darkslategray",
-      // width: "75%",
-      // my: 2,
       flex: 1,
       width: "100%",
       m: 1,
@@ -241,5 +206,4 @@ function playAudio(src) {
   }
   const audio = new Audio(src);
   audio.play();
-  // console.log(`TODO: playAudio(${src})`);
 }

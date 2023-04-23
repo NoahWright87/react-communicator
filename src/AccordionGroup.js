@@ -5,9 +5,6 @@ import { useState } from 'react';
 export function AccordionGroup(props) {
   const [expandedIndex, setExpandedIndex] = useState(null);
 
-  // const handleIndexChange = (index) => {
-  //   setExpandedIndex(index);
-  // }
   return <>
     {props.accordions.map((accordion, index) => {
       const isExpanded = index === expandedIndex;
@@ -18,15 +15,8 @@ export function AccordionGroup(props) {
         onChange={() => {
           setExpandedIndex(index);
         }}
-        // onClick={() => {
-        //   if(expandedIndex === index) {
-        //     setExpandedIndex(null);
-        //   }
-        // }}
         sx={{
           width: props.width ?? '100%',
-          // maxHeight: '80vh',
-          // color: expandedIndex === index ? 'yellow' : 'red',
         }}
       >
         <AccordionSummary
@@ -40,15 +30,12 @@ export function AccordionGroup(props) {
           <Typography
             variant="h2"
             sx={{
-              // color: 'primary.main',
               color: isExpanded ? 'primary.main' : 'text.secondary',
-              
             }}
           >
             {accordion.title}
           </Typography>
         </AccordionSummary>
-        {/* Really long content to test scrolling */}
         <AccordionDetails
           sx={{
             display: 'flex',
@@ -59,9 +46,7 @@ export function AccordionGroup(props) {
           }}
         >
           {accordion.content}
-          {/* {"lorum ipsum ".repeat(1000)} */}
         </AccordionDetails>
-
       </Accordion>;
     })}
   </>;
