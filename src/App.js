@@ -1,14 +1,12 @@
-import { Box, Button, Chip, MenuItem, Select, TextField, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import './App.css';
 // import { ButtonGroupSettings } from './InputSettings';
 // import GamepadTest from './GamepadTest';
 import CommunicatorDisplay from './CommunicatorDisplay';
-import CommunicatorInputSetup from './CommunicatorInputSetup';
 import CommunicatorSoundsSetup from './CommunicatorSoundsSetup';
 import { AccordionGroup } from './AccordionGroup';
 import { useState } from 'react';
 import { settings } from './Settings';
-import { PrevNextDisplay } from './Components/PrevNextDisplay';
 
 function App() {
   const [currentSettings, setSettings] = useState({settings});

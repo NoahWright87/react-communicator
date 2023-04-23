@@ -117,7 +117,8 @@ function NewPhrasesSection(props) {
           // submit={addPhrase}
           submit={submitDialog}
           cancel={() => {setDialogOpen(false)}}
-          phrase={defaultNewPhrase}
+          // phrase={defaultNewPhrase}
+          phrase={newPhrase}
         />
       </Box>
     </Box>
@@ -258,7 +259,7 @@ function NewPhraseEditDialog(props) {
             Variations
           </Typography>
           {/* List of variations */}
-          {variations?.length == 0
+          {variations?.length === 0
           ? <div>No variations... yet!</div>
           : variations.map((variation, i) => {
             return <NewVariationDetails
@@ -423,307 +424,309 @@ function NewModesSection(props) {
 
   </>
 }
-function NewModeDetails(props) {
 
-  return <>
-    {/* Mode name */}
+// TODO: Implement modes
+// function NewModeDetails(props) {
 
-    {/* Multi-select of phrases */}
+//   return <>
+//     {/* Mode name */}
 
-    {/* Delete button */}
+//     {/* Multi-select of phrases */}
 
-  </>
-}
+//     {/* Delete button */}
 
-function ModeDetailRow(props) {
-  // console.log("mode props: ", props);
+//   </>
+// }
+
+// function ModeDetailRow(props) {
+//   // console.log("mode props: ", props);
   
-  const modeName = props.mode.name;
-  const phrases = props.phrases;
+//   const modeName = props.mode.name;
+//   const phrases = props.phrases;
 
-  return <>
-    <Box>
-      <Typography
-        variant="h2"
-      >
-        {modeName}
-      </Typography>
-      <Box>
-        {phrases.map(phrase => {
-          return <PhraseDetailRow
-            phrase={phrase}
-            variations={phrase.variations}
-          />
-        })}
-      </Box>
-    </Box>
-  </>
-}
+//   return <>
+//     <Box>
+//       <Typography
+//         variant="h2"
+//       >
+//         {modeName}
+//       </Typography>
+//       <Box>
+//         {phrases.map(phrase => {
+//           return <PhraseDetailRow
+//             phrase={phrase}
+//             variations={phrase.variations}
+//           />
+//         })}
+//       </Box>
+//     </Box>
+//   </>
+// }
 
-function PhraseDetailRow(props) {
-  // console.log("phrase props: ", props);
-  const phraseName = props.phrase.name;
-  const variations = props.variations;
+// function PhraseDetailRow(props) {
+//   // console.log("phrase props: ", props);
+//   const phraseName = props.phrase.name;
+//   const variations = props.variations;
 
-  console.log("variations", variations);
+//   console.log("variations", variations);
 
-  return <Box
-    key={phraseName}
-  >
-    <Typography
-      variant="h3"
-    >
-      {phraseName}
-    </Typography>
-    <Box>
-      {variations.map(variation => {
-        return <VariationDetailRow
-          variation={variation}
-        />
-      })}
-    </Box>
-  </Box>
-}
+//   return <Box
+//     key={phraseName}
+//   >
+//     <Typography
+//       variant="h3"
+//     >
+//       {phraseName}
+//     </Typography>
+//     <Box>
+//       {variations.map(variation => {
+//         return <VariationDetailRow
+//           variation={variation}
+//         />
+//       })}
+//     </Box>
+//   </Box>
+// }
 
-function VariationDetailRow(props) {
-  const [openDialog, setOpenDialog] = useState(false);
-  const [variation, setVariation] = useState(props.variation);
+// function VariationDetailRow(props) {
+//   const [openDialog, setOpenDialog] = useState(false);
+//   const [variation, setVariation] = useState(props.variation);
 
-  const submitDialog = (updatedVariation) => {
-    setVariation(updatedVariation);
-    setOpenDialog(false);
-  };
-  const cancelDialog = () => {
-    console.log("canceling dialog");
-    setOpenDialog(false);
-  };
+//   const submitDialog = (updatedVariation) => {
+//     setVariation(updatedVariation);
+//     setOpenDialog(false);
+//   };
+//   const cancelDialog = () => {
+//     console.log("canceling dialog");
+//     setOpenDialog(false);
+//   };
 
-  // console.log("variation props: ", props);
+//   // console.log("variation props: ", props);
 
-  // const variationName = props.variation.name;
-  const src = variation.src;
-  const speach = variation.speach;
+//   // const variationName = props.variation.name;
+//   const src = variation.src;
+//   const speach = variation.speach;
 
-  return <>
-    <Box
-      sx={{
-        width: "100%",
-        display: "flex",
-        flexDirection: "row",
-        justifyContent: "space-between",
-      }}
-    >
-      {/* TODO: Input fields instead */}
-      {/* <Typography>
-        {variationName}
-      </Typography> */}
+//   return <>
+//     <Box
+//       sx={{
+//         width: "100%",
+//         display: "flex",
+//         flexDirection: "row",
+//         justifyContent: "space-between",
+//       }}
+//     >
+//       {/* TODO: Input fields instead */}
+//       {/* <Typography>
+//         {variationName}
+//       </Typography> */}
       
-      <Typography>
-        {src}
-      </Typography>
-      <Typography>
-        {speach}
-      </Typography>
-      {/* <TextField
-        label="Speach"
-        value={speach}
-      /> */}
-      <Button
-        variant="contained"
-        color="info"
-        onClick={() => setOpenDialog(true)}
-      >
-        Edit
-      </Button>
-      <VariationDialog
-        open={openDialog}
-        submit={submitDialog}
-        cancel={cancelDialog}
-        variation={variation}
-        // setOpen={setOpenDialog}
-        // variation={variation}
-        // setVariation={setVariation}
-      />
-    </Box>
-  </>
-}
+//       <Typography>
+//         {src}
+//       </Typography>
+//       <Typography>
+//         {speach}
+//       </Typography>
+//       {/* <TextField
+//         label="Speach"
+//         value={speach}
+//       /> */}
+//       <Button
+//         variant="contained"
+//         color="info"
+//         onClick={() => setOpenDialog(true)}
+//       >
+//         Edit
+//       </Button>
+//       <VariationDialog
+//         open={openDialog}
+//         submit={submitDialog}
+//         cancel={cancelDialog}
+//         variation={variation}
+//         // setOpen={setOpenDialog}
+//         // variation={variation}
+//         // setVariation={setVariation}
+//       />
+//     </Box>
+//   </>
+// }
 
-function VariationDialog(props) {
-  // console.log("dialog props: ", props);
-  const open = props.open;
-  const submit = props.submit;
-  const cancel = props.cancel;
+// function VariationDialog(props) {
+//   // console.log("dialog props: ", props);
+//   const open = props.open;
+//   const submit = props.submit;
+//   const cancel = props.cancel;
 
-  const [name, setName] = useState(props.variation.name);
-  const [src, setSrc] = useState('');
-  const [speach, setSpeach] = useState(props.variation.speach);
+//   const [name, setName] = useState(props.variation.name);
+//   const [src, setSrc] = useState(props.variation.src);
+//   const [speach, setSpeach] = useState(props.variation.speach);
 
-  const inputRef = useRef();
+//   const inputRef = useRef();
 
-  const setSrcAndPlay = (src) => {
-    if (src === '') return;
-    playSrc(src);
-  }
-  const playSrc = (src) => {
-    if (src === '') return;
+//   const setSrcAndPlay = (src) => {
+//     if (src === '') return;
+//     setSrc(src);
+//     playSrc(src);
+//   }
+//   const playSrc = (src) => {
+//     if (src === '') return;
 
-    // Play the audio file
-    const audio = new Audio(src);
-    audio.play();
-  }
+//     // Play the audio file
+//     const audio = new Audio(src);
+//     audio.play();
+//   }
   
 
-  return <>
-    <Dialog
-      open={open}
-      onClose={cancel}
-      // onClose={() => setOpen(false)}
-      sx={{
-        // width: "50%",
-        // height: "50%",
-        // position: "absolute",
-        // top: "25%",
-        // left: "25%",
-        // p: 2,
-      }}
-    >
-      <DialogTitle>
-        Edit Variation '{props.variation?.name}'
-      </DialogTitle>
-      <DialogContentText>
-        Edit the speach and/or upload a new file.
-      </DialogContentText>
-      <DialogContent>
-        <TextField 
-          label="Name"
-          value={name}
-          variant='standard'
-          autoFocus
-          fullWidth
-          margin='dense'
-          id='name'
-          type='text'
-          onChange={(e) => {
-            setName(e.target.value);
-          }}
-        />
-        <TextField
-          label="Speach"
-          value={speach}
-          variant='standard'
-          fullWidth
-          margin='dense'
-          id='speach'
-          type='text'
-          onChange={(e) => {
-            setSpeach(e.target.value);
-          }}
-        />
-        {/* File picker */}
-        {/* <TextField
-          label="Filename"
-          value={src}
-          variant='standard'
-          fullWidth
-          margin='dense'
-          id='src'
-          type='file'
-          inputRef={inputRef}
-          onChange={(e) => {
-            console.log(e);
-            setSrc(e.target.value);
-            // Play the audio file
-            // const audio = new Audio(e.target.value);
-            const audio = new Audio(URL.createObjectURL(e.target.files[0]));
-            const audio2 = new Audio(inputRef.current.files[0]);
-            audio.play();
+//   return <>
+//     <Dialog
+//       open={open}
+//       onClose={cancel}
+//       sx={{
+//         // width: "50%",
+//         // height: "50%",
+//         // position: "absolute",
+//         // top: "25%",
+//         // left: "25%",
+//         // p: 2,
+//       }}
+//     >
+//       <DialogTitle>
+//         Edit Variation '{props.variation?.name}'
+//       </DialogTitle>
+//       <DialogContentText>
+//         Edit the speach and/or upload a new file.
+//       </DialogContentText>
+//       <DialogContent>
+//         <TextField 
+//           label="Name"
+//           value={name}
+//           variant='standard'
+//           autoFocus
+//           fullWidth
+//           margin='dense'
+//           id='name'
+//           type='text'
+//           onChange={(e) => {
+//             setName(e.target.value);
+//           }}
+//         />
+//         <TextField
+//           label="Speach"
+//           value={speach}
+//           variant='standard'
+//           fullWidth
+//           margin='dense'
+//           id='speach'
+//           type='text'
+//           onChange={(e) => {
+//             setSpeach(e.target.value);
+//           }}
+//         />
+//         {/* File picker */}
+//         {/* <TextField
+//           label="Filename"
+//           value={src}
+//           variant='standard'
+//           fullWidth
+//           margin='dense'
+//           id='src'
+//           type='file'
+//           inputRef={inputRef}
+//           onChange={(e) => {
+//             console.log(e);
+//             setSrc(e.target.value);
+//             // Play the audio file
+//             // const audio = new Audio(e.target.value);
+//             const audio = new Audio(URL.createObjectURL(e.target.files[0]));
+//             const audio2 = new Audio(inputRef.current.files[0]);
+//             audio.play();
             
-            // audio2.play();
-            console.log("audio: ", audio);
-            console.log("audio2: ", audio2);
-          }}
-        /> */}
-        {/* <Button variant="contained" component="label">
-        Upload
-        <input hidden accept="image/*" multiple type="file" />
-      </Button> */}
-        <Button
-          variant="contained"
-          color="success"
-          component="label"
-        >
-          Upload
-          <input
-            hidden
-            accept='audio/*' 
-            type='file'
-            ref={inputRef}
-            onChange={(e) => {
-              console.log(e);
-              // console.log("inputRef: ", inputRef);
-              // console.log("inputRef files: ", inputRef?.current?.files);
-              // const audio = new Audio(URL.createObjectURL(e.target.files[0]));
-              // audio.play();
+//             // audio2.play();
+//             console.log("audio: ", audio);
+//             console.log("audio2: ", audio2);
+//           }}
+//         /> */}
+//         {/* <Button variant="contained" component="label">
+//         Upload
+//         <input hidden accept="image/*" multiple type="file" />
+//       </Button> */}
+//         <Button
+//           variant="contained"
+//           color="success"
+//           component="label"
+//         >
+//           Upload
+//           <input
+//             hidden
+//             accept='audio/*' 
+//             type='file'
+//             ref={inputRef}
+//             onChange={(e) => {
+//               console.log(e);
+//               // console.log("inputRef: ", inputRef);
+//               // console.log("inputRef files: ", inputRef?.current?.files);
+//               // const audio = new Audio(URL.createObjectURL(e.target.files[0]));
+//               // audio.play();
 
-              setSrcAndPlay(URL.createObjectURL(e.target.files[0]));
+//               setSrcAndPlay(URL.createObjectURL(e.target.files[0]));
               
-              // console.log("ref", ref);
-            }}
-          // ref={inputRef} 
-            // onChange={(e) => {
-            //   console.log(e);
-            //   setSrc(e.target.value);
-            //   // Play the audio file
-            //   // const audio = new Audio(e.target.value);
-            //   const audio = new Audio(URL.createObjectURL(e.target.files[0]));
-            //   const audio2 = new Audio(inputRef.current.files[0]);
-            //   audio.play();
+//               // console.log("ref", ref);
+//             }}
+//           // ref={inputRef} 
+//             // onChange={(e) => {
+//             //   console.log(e);
+//             //   setSrc(e.target.value);
+//             //   // Play the audio file
+//             //   // const audio = new Audio(e.target.value);
+//             //   const audio = new Audio(URL.createObjectURL(e.target.files[0]));
+//             //   const audio2 = new Audio(inputRef.current.files[0]);
+//             //   audio.play();
               
-            //   // audio2.play();
-            //   console.log("audio: ", audio);
-            //   console.log("audio2: ", audio2);
-            // }}
-          />
-        </Button>
-        <Typography>
-          {src === '' ? 'No file selected' : <Button
-            onClick={() => playSrc(src)}
-            color="info"
-          >
-            Preview
-          </Button>}
-        </Typography>
-      </DialogContent>
-      <DialogActions>
-        <Button
-          variant="contained"
-          color="info"
-          onClick={() => {
-            const newVariation = {
-              ...props.variation,
-              speach: speach,
+//             //   // audio2.play();
+//             //   console.log("audio: ", audio);
+//             //   console.log("audio2: ", audio2);
+//             // }}
+//           />
+//         </Button>
+//         <Typography>
+//           {src === '' ? 'No file selected' : <Button
+//             onClick={() => playSrc(src)}
+//             color="info"
+//           >
+//             Preview
+//           </Button>}
+//         </Typography>
+//       </DialogContent>
+//       <DialogActions>
+//         <Button
+//           variant="contained"
+//           color="info"
+//           onClick={() => {
+//             const newVariation = {
+//               ...props.variation,
+//               speach: speach,
 
-            };
+//             };
 
-            submit(newVariation);
-          }}
-        >
-          Save
-        </Button>
-        <Button
-          variant="contained"
-          color="warning"
-          onClick={cancel}
-        >
-          Cancel
-        </Button>
-        {/* <Button
-          variant="contained"
-          color="error"
-        >
-          Delete
-        </Button> */}
-      </DialogActions>
-    </Dialog>
-  </>
-}
+//             submit(newVariation);
+//           }}
+//         >
+//           Save
+//         </Button>
+//         <Button
+//           variant="contained"
+//           color="warning"
+//           onClick={cancel}
+//         >
+//           Cancel
+//         </Button>
+//         {/* <Button
+//           variant="contained"
+//           color="error"
+//         >
+//           Delete
+//         </Button> */}
+//       </DialogActions>
+//     </Dialog>
+//   </>
+// }
