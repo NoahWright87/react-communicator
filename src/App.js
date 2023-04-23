@@ -1,7 +1,13 @@
 import { Box, Button, Chip, MenuItem, Select, TextField, Typography } from '@mui/material';
 import './App.css';
 import { ButtonGroupSettings } from './InputSettings';
-
+import GamepadTest from './GamepadTest';
+import CommunicatorDisplay from './Communicator';
+import CommunicatorInputSetup from './CommunicatorInputSetup';
+import CommunicatorSoundsSetup from './CommunicatorSoundsSetup';
+import { AccordionGroup } from './AccordionGroup';
+import { useState } from 'react';
+import { settings } from './Settings';
 
 
 export const availableActions = [
@@ -32,7 +38,11 @@ function someFunction() {
 
 }
 
+
+
 function App() {
+  const [currentSettings, setSettings] = useState({settings});
+
   // window.addEventListener("gamepadconnected", (event) => {
   //   console.log("A gamepad connected:");
   //   console.log(event.gamepad);
@@ -43,18 +53,54 @@ function App() {
   //   console.log(event.gamepad);
   // });
 
-  // if ('speechSynthesis' in window) {
-  //   // Speech Synthesis supported 🎉
-  //   var msg = new SpeechSynthesisUtterance();
-  //   msg.text = "Hello, world!";
-  //   window.speechSynthesis.speak(msg);
-  //   console.log("Did it speak??");
+  // TODO: Look into this animation library:
+  //       https://github.com/pmndrs/react-spring
   
-  //  }else{
-  //    // Speech Synthesis Not Supported 😣
-  //    alert("Sorry, your browser doesn't support text to speech!");
-  //  }
+  const accordionContents = [
+    {
+      title: 'Save / Load',
+      content: "TODO: Save / Load buttons",
+    },
+    {
+      title: 'Sounds Setup',
+      content: <CommunicatorSoundsSetup
+        settings={currentSettings}
+        setSettings={setSettings}
+      />,
+    },
+    // {
+    //   title: 'Input Setup',
+    //   content: <CommunicatorInputSetup />,
+    // },
+    {
+      title: 'Communicator',
+      content: <CommunicatorDisplay
+        settings={currentSettings.settings}
+        setSettings={setSettings}
+      />,
+    },
+  ];
 
+  return <>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+        maxHeight: '100vh',
+        width: '100vw',
+        backgroundColor: 'black',
+      }}
+    >
+      <AccordionGroup
+        width="80%"
+        accordions={accordionContents}
+      />
+    </Box>
+  </>;
+  return <GamepadTest />;
   return <ButtonGroupSettings  />
 
   return <Box
@@ -325,7 +371,7 @@ export function ModeSetup() {
   </Box>;
 }
 
-export function CommunicatorDisplay() {
+export function CommunicatorDisplay_old() {
 
   let currentMode = 0;
   let currentPhrase = 0;
@@ -361,66 +407,66 @@ export function CommunicatorDisplay() {
   </Box>;
 }
 
-let settings = {
-  filename: "settings.json",
-  controlSchemes: [
-    {
-    name: "Left/Right",
-    buttonGroups: [
-        {
-          name: "Left",
-          buttons: [
-            {
-              id: 0,
-            },
-          ],
-          action: "nextPhrase",
-        },
-        {
-          name: "Right",
-          buttons: [
-            {
-              id: 1,
-            },
-          ],
-          action: "nextVariation",
-        },
-      ],
+// let settings = {
+//   filename: "settings.json",
+//   controlSchemes: [
+//     {
+//     name: "Left/Right",
+//     buttonGroups: [
+//         {
+//           name: "Left",
+//           buttons: [
+//             {
+//               id: 0,
+//             },
+//           ],
+//           action: "nextPhrase",
+//         },
+//         {
+//           name: "Right",
+//           buttons: [
+//             {
+//               id: 1,
+//             },
+//           ],
+//           action: "nextVariation",
+//         },
+//       ],
 
-    },
-  ],
-  modes: [
-    {
-      name: "Communication",
-      phrases: [
-        {
-          text: "Yes",
-          variations: [
-            {
-              text: "Hi",
-              src: "audio/yes/hi.mp3",
-            },
-            {
-              text: "Hello",
-              src: "audio/yes/hello.mp3",
-            },
-          ],
-        },
-        {
-          text: "No",
-          variations: [
-            {
-              text: "No",
-              src: "audio/no/no.mp3",
-            },
-            {
-              text: "Nope",
-              src: "audio/no/nope.mp3",
-            },
-          ],
-        },
-      ],
-    }
-  ]
-}
+//     },
+//   ],
+//   modes: [
+//     {
+//       name: "Communication",
+//       phrases: [
+//         {
+//           text: "Yes",
+//           variations: [
+//             {
+//               text: "Hi",
+//               src: "audio/yes/hi.mp3",
+//             },
+//             {
+//               text: "Hello",
+//               src: "audio/yes/hello.mp3",
+//             },
+//           ],
+//         },
+//         {
+//           text: "No",
+//           variations: [
+//             {
+//               text: "No",
+//               src: "audio/no/no.mp3",
+//             },
+//             {
+//               text: "Nope",
+//               src: "audio/no/nope.mp3",
+//             },
+//           ],
+//         },
+//       ],
+//     }
+//   ]
+// }
 
