@@ -1,9 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 
-export default function GamepadHelper({ callback }) {
-    const [status, setStatus] = useState("");
-
+export default function GamepadHelper({ callback, onPress, onRelease }) {
     useEffect(() => {
         let previousButtons = [];
     
@@ -16,28 +14,35 @@ export default function GamepadHelper({ callback }) {
             if (!gamepad) continue;
     
             const { buttons } = gamepad;
-            const pressedButtons = [];
+            const currentButtons = [];
     
             for (let j = 0; j < buttons.length; j++) {
               const button = buttons[j];
               if (button.pressed) {
-                pressedButtons.push(j);
+                currentButtons.push(j);
               }
             }
     
             const prevButtons = previousButtons;
-            const newButtons = pressedButtons.filter((button) => {
+            const pressedButtons = currentButtons.filter((button) => {
               return !prevButtons.includes(button);
             });
+            const releasedButtons = prevButtons.filter((button) => {
+                return !currentButtons.includes(button);
+            });
 
-            console.log(newButtons);
-            setStatus(newButtons);
-    
-            for (const newButton of newButtons) {
-              callback(newButton);
+            if (onPress){
+                for (const newButton of pressedButtons) {
+                    onPress(newButton);
+                }
+            }
+            if (onRelease) {
+                for (const newButton of releasedButtons) {
+                    onRelease(newButton);
+                }
             }
     
-            previousButtons = pressedButtons;
+            previousButtons = currentButtons;
           }
         }
     
@@ -51,6 +56,6 @@ export default function GamepadHelper({ callback }) {
 
     return <>
         {/* Do I need to display anything?? */}
-        {status}
+        {/* {status} */}
     </>
 }
