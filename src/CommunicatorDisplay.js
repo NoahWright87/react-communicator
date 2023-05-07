@@ -68,6 +68,31 @@ export default function CommunicatorDisplay(props) {
     }
   }
 
+  const buttonPress = (button) => {
+    switch(button) {
+      case 'Axis1+': // DPad vertical
+      case 'Axis1-':
+      case 'Axis0+': // DPad horizontal
+      case 'Axis0-':
+        performAction(actions.nextPhrase);
+        break;
+      case 'B0': // A
+      case 'B1': // B
+      case 'B7': // C
+      case 'B3': // X 
+      case 'B4': // Y
+      case 'B6': // Z
+        performAction(actions.nextVariation);
+        break;
+      default:
+      case 'B8': // Left shoulder
+      case 'B9': // Right shoulder
+      case 'B11': // select
+        performAction(actions.repeat);
+        break;
+    }
+  }
+
   const setState = (mode, phrase, variation, speech, src) => {
     setCurrentMode(mode);
     setCurrentPhrase(phrase);

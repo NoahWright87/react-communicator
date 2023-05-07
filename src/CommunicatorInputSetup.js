@@ -7,12 +7,12 @@ export default function CommunicatorInputSetup(props) {
   // const settings = props.settings;
   // const setSettings = props.setSettings;
 
-  const onPress = (button) => {
-    console.log("Press", button);
-  }
-  const onRelease = (button) => {
-    console.log("Release", button);
-  }
+  // const onPress = (button) => {
+  //   console.log("Press", button);
+  // }
+  // const onRelease = (button) => {
+  //   console.log("Release", button);
+  // }
   
   return <>
     <Box>
@@ -27,12 +27,12 @@ export default function CommunicatorInputSetup(props) {
         />
       })}
     </Box>
-    <Box>
+    {/* <Box>
       <GamepadHelper
         onPress={onPress}
         onRelease={onRelease}
       />
-    </Box>
+    </Box> */}
   </>
 }
 
