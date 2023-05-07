@@ -100,6 +100,10 @@ export const settings = {
       actions: [
         {
           name: actions.nextPhrase,
+          keys: [
+            "ArrowRight",
+            "ArrowLeft",
+          ],
           buttons: [
             {
               id: 'left alt',
