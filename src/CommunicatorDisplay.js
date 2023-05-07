@@ -1,6 +1,7 @@
-import { Box } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import { useState } from "react";
 import { PrevNextDisplay } from "./Components/PrevNextDisplay";
+import { actions } from "./Settings";
 
 
 export default function CommunicatorDisplay(props) {
@@ -33,15 +34,48 @@ export default function CommunicatorDisplay(props) {
     setState(currentMode, currentPhrase, variationIndex, variation?.name, variation?.src);
   };
 
-  const setState = (mode, phrase, variation, speach, src) => {
+  const getNextIndex = (current, size, direction) => {
+    return (current + direction + size) % size;
+  }
+  const performAction = (action) => {
+    switch(action) {
+      case actions.nextMode:
+        setModeAndSpeak(getNextIndex(currentMode, modes.length, 1));
+      break;
+      case actions.previousMode:
+        setModeAndSpeak(getNextIndex(currentMode, modes.length, -1));
+      break;
+      case actions.nextPhrase:
+        setPhraseAndSpeak(getNextIndex(currentPhrase, phrases.length, 1));
+      break;
+      case actions.previousPhrase:
+        setPhraseAndSpeak(getNextIndex(currentPhrase, phrases.length, -1));
+      break;
+      case actions.nextVariation:
+        setVariationAndSpeak(getNextIndex(currentVariation, variations.length, 1));
+      break;
+      case actions.previousVariation:
+        setVariationAndSpeak(getNextIndex(currentVariation, variations.length, -1));
+      break;
+      case actions.repeat:
+        if (variations[currentVariation].src) {
+          playAudio(variations[currentVariation].src);
+        } else if (variations[currentVariation].name) {
+          speak(variations[currentVariation].name);
+        }
+      break;
+    }
+  }
+
+  const setState = (mode, phrase, variation, speech, src) => {
     setCurrentMode(mode);
     setCurrentPhrase(phrase);
     setCurrentVariation(variation);
 
     if (src) {
       playAudio(src);
-    } else if (speach) {
-      speak(speach);
+    } else if (speech) {
+      speak(speech);
     }
   };
 
@@ -72,7 +106,19 @@ export default function CommunicatorDisplay(props) {
       index={currentVariation}
       setter={setVariationAndSpeak}
     />
-
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
+      <Button
+        variant="contained"
+        onClick={() => {performAction(actions.repeat)}}
+      >
+          Repeat
+      </Button>
+    </Box>
   </Box>
 }
 

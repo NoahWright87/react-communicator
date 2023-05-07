@@ -1,12 +1,12 @@
+import { Add, Delete, Edit } from '@mui/icons-material';
+import { Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
 import { useRef, useState } from 'react';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Typography } from '@mui/material';
 import { AccordionGroup } from './AccordionGroup';
 
 export default function CommunicatorSoundsSetup(props) {
   const currentSettings = props.settings;
   const setSettings = props.setSettings;
 
-  // console.log("currentSettings", currentSettings);
   const setPhrase = (phrase, index) => {
     const newSettings = { ...currentSettings };
     newSettings.settings.phrases[index] = phrase;
@@ -17,23 +17,49 @@ export default function CommunicatorSoundsSetup(props) {
     newSettings.settings.phrases.push(newPhrase);
     setSettings(newSettings);
   }
+  const deletePhrase = (index) => {
+    const newSettings = { ...currentSettings };
+    newSettings.settings.phrases.splice(index, 1);
+    setSettings(newSettings);
+  }
+
+  const setMode = (mode, index) => {
+    const newSettings = { ...currentSettings };
+    newSettings.settings.modes[index] = mode;
+    setSettings(newSettings);
+  }
+  const addMode = (newMode) => {
+    const newSettings = { ...currentSettings };
+    newSettings.settings.modes.push(newMode);
+    setSettings(newSettings);
+  }
+  const deleteMode = (index) => {
+    const newSettings = { ...currentSettings };
+    newSettings.settings.modes.splice(index, 1);
+    setSettings(newSettings);
+  }
 
   return <>
     <AccordionGroup
       accordions={[
         {
           title: "Phrases",
-          content: <NewPhrasesSection 
+          content: <PhrasesSection 
             phrases={currentSettings.settings.phrases}
             // setPhrases={setSettings}
             setPhrase={setPhrase}
             addPhrase={addPhrase}
+            deletePhrase={deletePhrase}
           />
         },
         {
           title: "Modes",
-          content: <NewModesSection
-
+          content: <ModesSection
+            modes={currentSettings.settings.modes}
+            updateMode={setMode}
+            addMode={addMode}
+            deleteMode={deleteMode}
+            availablePhrases={currentSettings.settings.phrases}
           />
         },
         {
@@ -44,22 +70,15 @@ export default function CommunicatorSoundsSetup(props) {
         },
       ]}
     />
-    {/* <Box>
-      {currentSettings.settings.modes.map(mode => {
-        return <ModeDetailRow
-          mode={mode}
-          phrases={mode.phrases}
-        />
-      })}
-    </Box> */}
     
   </>
 }
 
-function NewPhrasesSection(props) {
+function PhrasesSection(props) {
   const phrases = props.phrases;
   const setPhrase = props.setPhrase;
   const addPhrase = props.addPhrase;
+  const deletePhrase = props.deletePhrase;
 
   const defaultNewPhrase = {
     name: "New phrase",
@@ -85,9 +104,10 @@ function NewPhrasesSection(props) {
         {/* TODO: Header row?? */}
       </Box>
       {phrases.map((phrase, i) => {
-        return <NewPhraseDetails
+        return <PhraseDetails
           phrase={phrase}
           setPhrase={setPhrase}
+          deletePhrase={deletePhrase}
           index={i}
         />
       })}
@@ -103,36 +123,28 @@ function NewPhrasesSection(props) {
           variant="outlined"
           size="large"
           color='success'
-          // onClick={() => {props.addPhrase({
-          //   name: "New phrase",
-          //   variations: [],
-          // })}}
           onClick={addPhraseClick}
         >
-          Add new phrase
+          <Add />
+          Add phrase
         </Button>
-        <NewPhraseEditDialog
-          // open={false}
+        <PhraseEditDialog
           open={dialogOpen}
-          // submit={addPhrase}
           submit={submitDialog}
           cancel={() => {setDialogOpen(false)}}
-          // phrase={defaultNewPhrase}
           phrase={newPhrase}
         />
       </Box>
     </Box>
   </>;
 }
-function NewPhraseDetails(props) {
-  // This function is the (uneditable) row for a phrase
+function PhraseDetails(props) {
   const [openDialog, setOpenDialog] = useState(false);
-  // const [phrase, setPhrase] = useState(props.phrase);
   const phrase = props.phrase;
   const setPhrase = props.setPhrase;
+  const deletePhrase = props.deletePhrase;
 
   const submitDialog = (newPhrase) => {
-    // console.log("submitting newPhrase", newPhrase);
     setPhrase(newPhrase, props.index);
     setOpenDialog(false);
   }
@@ -145,10 +157,11 @@ function NewPhraseDetails(props) {
     sx={{
       display: "flex",
       flexDirection: "row",
-      justifyContent: "space-around",
+      justifyContent: "space-between",
       my: 1,
     }}
   >
+    {/* TODO: Consider putting these in locked textboxes */}
     {/* Phrase name */}
     <Typography
     >
@@ -162,22 +175,29 @@ function NewPhraseDetails(props) {
     </Typography>
 
     {/* Edit button */}
-    <Button
-      variant="outlined"
-      onClick={() => {setOpenDialog(true)}}
+    <Box
+      sx={{
+        display: 'flex',
+        py: 1,
+      }}
     >
-      Edit
-    </Button>
+      <Button
+        variant="contained"
+        onClick={() => {setOpenDialog(true)}}
+      >
+        <Edit />
+      </Button>
 
-    {/* Delete button */}
-    <Button
-      variant="outlined"
-      color="error"
-      onClick={() => {alert('TODO: Delete phrase after "are you sure?" prompt')}}
-    >
-      Delete
-    </Button>
-    <NewPhraseEditDialog
+      {/* Delete button */}
+      <Button
+        variant="contained"
+        color="error"
+        onClick={() => {deletePhrase(props.index)}}
+      >
+        <Delete />
+      </Button>
+    </Box>
+    <PhraseEditDialog
       open={openDialog}
       submit={submitDialog}
       cancel={cancelDialog}
@@ -185,7 +205,7 @@ function NewPhraseDetails(props) {
     />
   </Box>
 }
-function NewPhraseEditDialog(props) {
+function PhraseEditDialog(props) {
   const open = props.open;
   const submit = props.submit;
   const cancel = props.cancel;
@@ -262,7 +282,7 @@ function NewPhraseEditDialog(props) {
           {variations?.length === 0
           ? <div>No variations... yet!</div>
           : variations.map((variation, i) => {
-            return <NewVariationDetails
+            return <VariationDetails
               key={i}
               index={i}
               variation={variation}
@@ -313,7 +333,7 @@ function NewPhraseEditDialog(props) {
       </DialogContent>
   </Dialog>
 }
-function NewVariationDetails(props) {
+function VariationDetails(props) {
   const [variationName, setVariationName] = useState(props.variation.name);
   const [variationSrc, setVariationSrc] = useState(props.variation.src);
   const [variationDisplay, setVariationDisplay] = useState(props.variation.display);
@@ -413,320 +433,225 @@ function NewVariationDetails(props) {
       {/* TODO EVENTUALLY: Let them pick from default sounds */}
     </Box>
 }
-function NewModesSection(props) {
+function ModesSection(props) {
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const newMode = {
+    name: "New mode",
+    phrases: [],
+  };
+
+  const submitDialog = (newMode) => {
+    props.addMode(newMode);
+
+    setDialogOpen(false);
+  }
 
   return <>
-    {/* Header */}
-
     {/* List of modes */}
+    <Box
+    >
+      {props.modes.map((mode, i) => {
+        return <ModeDetails
+          key={i}
+          index={i}
+          mode={mode}
+          availablePhrases={props.availablePhrases}
+          updateMode={props.updateMode}
+          deleteMode={props.deleteMode}
+        />
+      })}
+    </Box>
 
-    {/* Add new mode button */}
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "center",
+      }}
+    >
+      <Button
+        variant="outlined"
+        color="success"
+        onClick={() => setDialogOpen(true)}
+      >
+        <Add />
+        Add mode
+      </Button>
+    </Box>
 
+    <ModeEditDialog
+      open={dialogOpen}
+      submit={submitDialog}
+      cancel={() => setDialogOpen(false)}
+      mode={newMode}
+      availablePhrases={props.availablePhrases}
+    />
   </>
 }
+function ModeDetails(props) {
+  const [dialogOpen, setDialogOpen] = useState(false);
 
-// TODO: Implement modes
-// function NewModeDetails(props) {
+  const cancel = () => {
+    setDialogOpen(false);
+  }
+  const submit = (mode) => {
+    props.updateMode(mode, props.index);
 
-//   return <>
-//     {/* Mode name */}
-
-//     {/* Multi-select of phrases */}
-
-//     {/* Delete button */}
-
-//   </>
-// }
-
-// function ModeDetailRow(props) {
-//   // console.log("mode props: ", props);
-  
-//   const modeName = props.mode.name;
-//   const phrases = props.phrases;
-
-//   return <>
-//     <Box>
-//       <Typography
-//         variant="h2"
-//       >
-//         {modeName}
-//       </Typography>
-//       <Box>
-//         {phrases.map(phrase => {
-//           return <PhraseDetailRow
-//             phrase={phrase}
-//             variations={phrase.variations}
-//           />
-//         })}
-//       </Box>
-//     </Box>
-//   </>
-// }
-
-// function PhraseDetailRow(props) {
-//   // console.log("phrase props: ", props);
-//   const phraseName = props.phrase.name;
-//   const variations = props.variations;
-
-//   console.log("variations", variations);
-
-//   return <Box
-//     key={phraseName}
-//   >
-//     <Typography
-//       variant="h3"
-//     >
-//       {phraseName}
-//     </Typography>
-//     <Box>
-//       {variations.map(variation => {
-//         return <VariationDetailRow
-//           variation={variation}
-//         />
-//       })}
-//     </Box>
-//   </Box>
-// }
-
-// function VariationDetailRow(props) {
-//   const [openDialog, setOpenDialog] = useState(false);
-//   const [variation, setVariation] = useState(props.variation);
-
-//   const submitDialog = (updatedVariation) => {
-//     setVariation(updatedVariation);
-//     setOpenDialog(false);
-//   };
-//   const cancelDialog = () => {
-//     console.log("canceling dialog");
-//     setOpenDialog(false);
-//   };
-
-//   // console.log("variation props: ", props);
-
-//   // const variationName = props.variation.name;
-//   const src = variation.src;
-//   const speach = variation.speach;
-
-//   return <>
-//     <Box
-//       sx={{
-//         width: "100%",
-//         display: "flex",
-//         flexDirection: "row",
-//         justifyContent: "space-between",
-//       }}
-//     >
-//       {/* TODO: Input fields instead */}
-//       {/* <Typography>
-//         {variationName}
-//       </Typography> */}
-      
-//       <Typography>
-//         {src}
-//       </Typography>
-//       <Typography>
-//         {speach}
-//       </Typography>
-//       {/* <TextField
-//         label="Speach"
-//         value={speach}
-//       /> */}
-//       <Button
-//         variant="contained"
-//         color="info"
-//         onClick={() => setOpenDialog(true)}
-//       >
-//         Edit
-//       </Button>
-//       <VariationDialog
-//         open={openDialog}
-//         submit={submitDialog}
-//         cancel={cancelDialog}
-//         variation={variation}
-//         // setOpen={setOpenDialog}
-//         // variation={variation}
-//         // setVariation={setVariation}
-//       />
-//     </Box>
-//   </>
-// }
-
-// function VariationDialog(props) {
-//   // console.log("dialog props: ", props);
-//   const open = props.open;
-//   const submit = props.submit;
-//   const cancel = props.cancel;
-
-//   const [name, setName] = useState(props.variation.name);
-//   const [src, setSrc] = useState(props.variation.src);
-//   const [speach, setSpeach] = useState(props.variation.speach);
-
-//   const inputRef = useRef();
-
-//   const setSrcAndPlay = (src) => {
-//     if (src === '') return;
-//     setSrc(src);
-//     playSrc(src);
-//   }
-//   const playSrc = (src) => {
-//     if (src === '') return;
-
-//     // Play the audio file
-//     const audio = new Audio(src);
-//     audio.play();
-//   }
+    setDialogOpen(false);
+  }
   
 
-//   return <>
-//     <Dialog
-//       open={open}
-//       onClose={cancel}
-//       sx={{
-//         // width: "50%",
-//         // height: "50%",
-//         // position: "absolute",
-//         // top: "25%",
-//         // left: "25%",
-//         // p: 2,
-//       }}
-//     >
-//       <DialogTitle>
-//         Edit Variation '{props.variation?.name}'
-//       </DialogTitle>
-//       <DialogContentText>
-//         Edit the speach and/or upload a new file.
-//       </DialogContentText>
-//       <DialogContent>
-//         <TextField 
-//           label="Name"
-//           value={name}
-//           variant='standard'
-//           autoFocus
-//           fullWidth
-//           margin='dense'
-//           id='name'
-//           type='text'
-//           onChange={(e) => {
-//             setName(e.target.value);
-//           }}
-//         />
-//         <TextField
-//           label="Speach"
-//           value={speach}
-//           variant='standard'
-//           fullWidth
-//           margin='dense'
-//           id='speach'
-//           type='text'
-//           onChange={(e) => {
-//             setSpeach(e.target.value);
-//           }}
-//         />
-//         {/* File picker */}
-//         {/* <TextField
-//           label="Filename"
-//           value={src}
-//           variant='standard'
-//           fullWidth
-//           margin='dense'
-//           id='src'
-//           type='file'
-//           inputRef={inputRef}
-//           onChange={(e) => {
-//             console.log(e);
-//             setSrc(e.target.value);
-//             // Play the audio file
-//             // const audio = new Audio(e.target.value);
-//             const audio = new Audio(URL.createObjectURL(e.target.files[0]));
-//             const audio2 = new Audio(inputRef.current.files[0]);
-//             audio.play();
-            
-//             // audio2.play();
-//             console.log("audio: ", audio);
-//             console.log("audio2: ", audio2);
-//           }}
-//         /> */}
-//         {/* <Button variant="contained" component="label">
-//         Upload
-//         <input hidden accept="image/*" multiple type="file" />
-//       </Button> */}
-//         <Button
-//           variant="contained"
-//           color="success"
-//           component="label"
-//         >
-//           Upload
-//           <input
-//             hidden
-//             accept='audio/*' 
-//             type='file'
-//             ref={inputRef}
-//             onChange={(e) => {
-//               console.log(e);
-//               // console.log("inputRef: ", inputRef);
-//               // console.log("inputRef files: ", inputRef?.current?.files);
-//               // const audio = new Audio(URL.createObjectURL(e.target.files[0]));
-//               // audio.play();
+  return <Box
+    key={props.index}
+    sx={{
+      display: "flex",
+      flexDirection: "row",
+      // alignItems: "center",
+      justifyContent: "space-between",
+      my: 1.5,
+    }}
+  >
+    <TextField
+      variant="outlined"
+      label="Mode name"
+      value={props.mode.name}
+    />
 
-//               setSrcAndPlay(URL.createObjectURL(e.target.files[0]));
-              
-//               // console.log("ref", ref);
-//             }}
-//           // ref={inputRef} 
-//             // onChange={(e) => {
-//             //   console.log(e);
-//             //   setSrc(e.target.value);
-//             //   // Play the audio file
-//             //   // const audio = new Audio(e.target.value);
-//             //   const audio = new Audio(URL.createObjectURL(e.target.files[0]));
-//             //   const audio2 = new Audio(inputRef.current.files[0]);
-//             //   audio.play();
-              
-//             //   // audio2.play();
-//             //   console.log("audio: ", audio);
-//             //   console.log("audio2: ", audio2);
-//             // }}
-//           />
-//         </Button>
-//         <Typography>
-//           {src === '' ? 'No file selected' : <Button
-//             onClick={() => playSrc(src)}
-//             color="info"
-//           >
-//             Preview
-//           </Button>}
-//         </Typography>
-//       </DialogContent>
-//       <DialogActions>
-//         <Button
-//           variant="contained"
-//           color="info"
-//           onClick={() => {
-//             const newVariation = {
-//               ...props.variation,
-//               speach: speach,
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-around",
+        alignItems: "center",
+      }}
+    >
+      {props.mode.phrases.map((phrase, i) => {
+        return <Chip
+          key={i}
+          label={phrase}
+        />
+      })}
+    </Box>
+    <ModeEditDialog
+      open={dialogOpen}
+      submit={submit}
+      cancel={cancel}
+      mode={props.mode}
+      availablePhrases={props.availablePhrases}
+    />
 
-//             };
+    <Box
+      sx={{
+        display: 'flex',
+        py: 1,
+      }}
+    >
+      <Button
+        variant="contained"
+        onClick={() => {setDialogOpen(true)}}
+        color='info'
+      >
+        <Edit />
+      </Button>
 
-//             submit(newVariation);
-//           }}
-//         >
-//           Save
-//         </Button>
-//         <Button
-//           variant="contained"
-//           color="warning"
-//           onClick={cancel}
-//         >
-//           Cancel
-//         </Button>
-//         {/* <Button
-//           variant="contained"
-//           color="error"
-//         >
-//           Delete
-//         </Button> */}
-//       </DialogActions>
-//     </Dialog>
-//   </>
-// }
+      <Button
+        variant="contained"
+        color="error"
+        onClick={() => {props.deleteMode(props.index)}}
+      >
+        <Delete />
+      </Button>
+    </Box>
+  </Box>
+}
+function ModeEditDialog(props) {
+  const open = props.open;
+  const mode = props.mode;
+  const availablePhrases = props.availablePhrases;
+
+  const [name, setName] = useState(mode.name);
+  const [phrases, setPhrases] = useState(mode.phrases);
+
+  const submit = () => {
+    props.submit({
+      name: name,
+      phrases: phrases,
+    });
+  }
+  const cancel = () => {
+    setName(mode.name);
+    setPhrases(mode.phrases);
+    props.cancel();
+  }
+
+
+  return <Dialog
+    open={open}
+    onClose={cancel}
+    fullWidth
+  >
+    <DialogTitle
+      sx={{
+        bgcolor: 'primary.dark',
+        marginBottom: 1,
+      }}
+    >
+      Edit mode
+    </DialogTitle>
+    <DialogContent
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <TextField
+        variant="outlined"
+        label="Mode name"
+        value={name}
+        onChange={(e) => {setName(e.target.value)}}
+        sx={{
+          my: 1,
+        }}
+      />
+      <FormControl
+        sx={{
+          my: 1,
+        }}
+      >
+        <InputLabel
+          id="mode-phrase-select-label"
+        >
+          Phrases
+        </InputLabel>
+        <Select
+          labelId="mode-phrase-select-label"
+          multiple
+          value={phrases}
+          onChange={(e) => {setPhrases(e.target.value)}}
+        >
+          {availablePhrases.map((phrase) => (
+            <MenuItem
+              key={phrase.name}
+              value={phrase.name}
+            >
+              {phrase.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      <DialogActions>
+        <Button
+          onClick={cancel}
+        >
+          Cancel
+        </Button>
+        <Button
+          onClick={() => {submit(name, phrases)}}
+        >
+          Save
+        </Button>
+      </DialogActions>
+    </DialogContent>
+  </Dialog>
+}

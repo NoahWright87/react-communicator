@@ -10,7 +10,6 @@ export const actions = {
 }
 
 export const settings = {
-  filename: "settings.json",
   phrases: [
     {
       name: "Yes",

@@ -7,6 +7,7 @@ import CommunicatorSoundsSetup from './CommunicatorSoundsSetup';
 import { AccordionGroup } from './AccordionGroup';
 import { useState } from 'react';
 import { settings } from './Settings';
+import { CommunicatorSaveLoad } from './CommmunicatorSaveLoad';
 
 function App() {
   const [currentSettings, setSettings] = useState({settings});
@@ -27,7 +28,10 @@ function App() {
   const accordionContents = [
     {
       title: 'Save / Load',
-      content: "TODO: Save / Load buttons",
+      content: <CommunicatorSaveLoad 
+        settings={currentSettings}
+        setSettings={setSettings}
+      />,
     },
     {
       title: 'Sounds Setup',
