@@ -2,6 +2,7 @@ import { Box, Button } from "@mui/material";
 import { useState } from "react";
 import { PrevNextDisplay } from "./Components/PrevNextDisplay";
 import { actions } from "./Settings";
+import GamepadHelper from "./GamepadHelper";
 
 
 export default function CommunicatorDisplay(props) {
@@ -114,6 +115,9 @@ export default function CommunicatorDisplay(props) {
       alignItems: 'center',
     }}
   >
+    <GamepadHelper
+      onPress={buttonPress}
+    />
     <PrevNextDisplay
       title="Mode"
       items={modes.map(mode => mode.name)}
