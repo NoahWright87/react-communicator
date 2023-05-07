@@ -25,8 +25,9 @@ export default function GamepadHelper({ callback }) {
               }
             }
     
+            const prevButtons = previousButtons;
             const newButtons = pressedButtons.filter((button) => {
-              return !previousButtons.includes(button);
+              return !prevButtons.includes(button);
             });
 
             console.log(newButtons);
