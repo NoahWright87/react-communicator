@@ -1,8 +1,13 @@
 import { Backdrop, Box, Button, Chip, Typography } from "@mui/material"
 import { actions } from "./Settings"
 import { useEffect, useState } from "react";
+import GamepadHelper from "./GamepadHelper";
 
-export default function CommunicatorInputSetup() {
+export default function CommunicatorInputSetup(props) {
+  const settings = props.settings;
+  const setSettings = props.setSettings;
+
+  
   return <>
     <Box>
       TODO: Create way to make / save / retrieve control schemes
@@ -15,6 +20,9 @@ export default function CommunicatorInputSetup() {
           actionName={actions[action]}
         />
       })}
+    </Box>
+    <Box>
+      <GamepadHelper />
     </Box>
   </>
 }

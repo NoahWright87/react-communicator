@@ -1,7 +1,7 @@
 import { Box, Button } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PrevNextDisplay } from "./Components/PrevNextDisplay";
-import { actions } from "./Settings";
+import { actions, settings } from "./Settings";
 
 
 export default function CommunicatorDisplay(props) {
@@ -122,18 +122,119 @@ export default function CommunicatorDisplay(props) {
   </Box>
 }
 
+let lastAudio = null;
 function speak(words) {
+  stopSounds();
   if (window.speechSynthesis) {
-    window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(words);
     window.speechSynthesis.speak(utterance);
   }
 }
 
 function playAudio(src) {
+  stopSounds();
   if (!src) {
     return;
   }
   const audio = new Audio(src);
+  lastAudio = audio;
   audio.play();
+}
+
+function stopSounds() {
+  if (lastAudio) {
+    lastAudio.pause();
+    lastAudio.currentTime = 0;
+  }
+  if (window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+  }
+}
+
+
+
+function CommunicatorInput(props) {
+  const performAction = props.performAction;
+  const controlScheme = props.controlScheme;
+
+  const keyActionMap = {};
+  const buttonActionMap = {};
+
+  controlScheme.actions.forEach((action) => {
+    action.keys.forEach((key) => {
+      keyActionMap[key] = action.name;
+    });
+    action.buttons.forEach((button) => {
+      buttonActionMap[button] = action.name;
+    });
+  });
+
+
+  // Hook to listen for keyboard input
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      const action = keyActionMap[event.key];
+      if (action) {
+        performAction(action);
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [props]);
+
+  // TODO: Use my gamepad helper???
+  // // Hook to listen for gamepad input each frame
+  // useEffect(() => {
+  //   const handleGamepadInput = () => {
+  //     const gamepad = navigator.getGamepads()[0];
+  //     if (!gamepad) {
+  //       return;
+  //     }
+  //     const buttons = gamepad.buttons;
+  //     const axes = gamepad.axes;
+  //     if (buttons[0].pressed) {
+  //       props.performAction(actions.repeat);
+  //     }
+  //     if (buttons[1].pressed) {
+  //       props.performAction(actions.previousVariation);
+  //     }
+  //     if (buttons[2].pressed) {
+  //       props.performAction(actions.nextVariation);
+  //     }
+  //     if (buttons[3].pressed) {
+  //       props.performAction(actions.previousPhrase);
+  //     }
+  //     if (buttons[4].pressed) {
+  //       props.performAction(actions.nextPhrase);
+  //     }
+  //     if (buttons[5].pressed) {
+  //       props.performAction(actions.previousMode);
+  //     }
+  //     if (buttons[6].pressed) {
+  //       props.performAction(actions.nextMode);
+  //     }
+  //     if (axes[1] < -0.5) {
+  //       props.performAction(actions.previousVariation);
+  //     }
+  //     if (axes[1] > 0.5) {
+  //       props.performAction(actions.nextVariation);
+  //     }
+  //     if (axes[0] < -0.5) {
+  //       props.performAction(actions.previousPhrase);
+  //     }
+  //     if (axes[0] > 0.5) {
+  //       props.performAction(actions.nextPhrase);
+  //     }
+  //   }
+  //   const interval = setInterval(handleGamepadInput, 50);
+  //   return () => {
+  //     clearInterval(interval);
+  //   }
+  // }, [props]);
+
+  return <>
+    {/* Nothing needs to be displayed! */}
+  </>
 }
