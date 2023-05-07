@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import GamepadHelper from "./GamepadHelper";
 
 export default function CommunicatorInputSetup(props) {
-  const settings = props.settings;
-  const setSettings = props.setSettings;
+  // const settings = props.settings;
+  // const setSettings = props.setSettings;
 
   
   return <>
