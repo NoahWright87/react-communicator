@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 
+const threshold = 0.5;
 
 export default function GamepadHelper({ callback, onPress, onRelease }) {
     useEffect(() => {
@@ -13,16 +14,25 @@ export default function GamepadHelper({ callback, onPress, onRelease }) {
             const gamepad = gamepads[i];
             if (!gamepad) continue;
     
-            const { buttons } = gamepad;
+            const { buttons, axes } = gamepad;
             const currentButtons = [];
     
             for (let j = 0; j < buttons.length; j++) {
               const button = buttons[j];
               if (button.pressed) {
-                currentButtons.push(j);
+                currentButtons.push("B" + j);
               }
             }
-    
+            for (let j = 0; j < axes.length; j++) {
+              const axis = axes[j];
+              if (axis > threshold) {
+                currentButtons.push("Axis" + j + "+");
+              } else if (axis < -threshold) {
+                currentButtons.push("Axis" + j + "-");
+              }
+            }
+   
+            
             const prevButtons = previousButtons;
             const pressedButtons = currentButtons.filter((button) => {
               return !prevButtons.includes(button);
@@ -32,13 +42,13 @@ export default function GamepadHelper({ callback, onPress, onRelease }) {
             });
 
             if (onPress){
-                for (const newButton of pressedButtons) {
-                    onPress(newButton);
+                for (const b of pressedButtons) {
+                    onPress(b);
                 }
             }
             if (onRelease) {
-                for (const newButton of releasedButtons) {
-                    onRelease(newButton);
+                for (const b of releasedButtons) {
+                    onRelease(b);
                 }
             }
     
