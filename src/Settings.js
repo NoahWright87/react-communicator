@@ -96,63 +96,61 @@ export const settings = {
   ],
   controlSchemes: [
     {
-      name: "Left/Right",
+      name: "Left/Right/Top",
       actions: [
+        {
+          name: actions.repeat,
+          keys: [
+            'G0-B8',
+            'G0-B9',
+            'Space'
+          ],
+        },
         {
           name: actions.nextPhrase,
           keys: [
-            "ArrowRight",
             "ArrowLeft",
-          ],
-          buttons: [
-            {
-              id: 'left alt',
-            },
-            {
-              id: 'left shift',
-            },
-            {
-              id: 'left ctrl',
-            },
+            "G0-Axis0+",
+            "G0-Axis0-",
+            "G0-Axis1+",
+            "G0-Axis1-",
           ],
         },
         {
           name: actions.nextVariation,
-          buttons: [
-            {
-              id: 'right alt',
-            },
-            {
-              id: 'right shift',
-            },
-            {
-              id: 'right ctrl',
-            },
+          keys: [
+            "ArrowRight",
+            "G0-B0",
+            "G0-B1",
+            "G0-B7",
+            "G0-B3",
+            "G0-B4",
+            "G0-B6",
           ],
         },
       ]
     },
-    {
-      name: "Numpad",
-      actions: [
-        {
-          name: actions.nextPhrase,
-          buttons: [
-            {
-              id: 'numpad 1',
-            },
-          ],
-        },
-        {
-          name: actions.nextVariation,
-          buttons: [
-            {
-              id: 'numpad 2',
-            },
-          ],
-        },
-      ],
-    },
+    // {
+    //   name: "Numpad",
+    //   actions: [
+    //     {
+    //       name: actions.nextPhrase,
+    //       buttons: [
+    //         {
+    //           id: 'numpad 1',
+    //         },
+    //       ],
+    //     },
+    //     {
+    //       name: actions.nextVariation,
+    //       buttons: [
+    //         {
+    //           id: 'numpad 2',
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // },
   ],
 };
 

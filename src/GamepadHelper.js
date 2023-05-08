@@ -1,8 +1,7 @@
 import { useEffect } from "react";
 
 const threshold = 0.5;
-
-export default function GamepadHelper({ callback, onPress, onRelease }) {
+export function GamepadHelper({ onInput }) {
     useEffect(() => {
         let previousButtons = [];
     
@@ -20,18 +19,17 @@ export default function GamepadHelper({ callback, onPress, onRelease }) {
             for (let j = 0; j < buttons.length; j++) {
               const button = buttons[j];
               if (button.pressed) {
-                currentButtons.push("B" + j);
+                currentButtons.push( `G${i}-B${j}`);
               }
             }
             for (let j = 0; j < axes.length; j++) {
               const axis = axes[j];
               if (axis > threshold) {
-                currentButtons.push("Axis" + j + "+");
+                currentButtons.push(`G${i}-Axis${j}+`);
               } else if (axis < -threshold) {
-                currentButtons.push("Axis" + j + "-");
+                currentButtons.push(`G${i}-Axis${j}-`);
               }
             }
-   
             
             const prevButtons = previousButtons;
             const pressedButtons = currentButtons.filter((button) => {
@@ -40,15 +38,19 @@ export default function GamepadHelper({ callback, onPress, onRelease }) {
             const releasedButtons = prevButtons.filter((button) => {
                 return !currentButtons.includes(button);
             });
+            const heldButtons = currentButtons.filter((button) => {
+                return prevButtons.includes(button);
+            });
 
-            if (onPress){
+            if (onInput) {
                 for (const b of pressedButtons) {
-                    onPress(b);
+                    onInput(b);
                 }
-            }
-            if (onRelease) {
+                for (const b of heldButtons) {
+                    onInput(b + "-hold");
+                }
                 for (const b of releasedButtons) {
-                    onRelease(b);
+                    onInput(b + "-release");
                 }
             }
     
@@ -59,13 +61,7 @@ export default function GamepadHelper({ callback, onPress, onRelease }) {
         const intervalId = setInterval(checkGamepad, 16);
     
         return () => clearInterval(intervalId);
-      }, [callback]);
-    
-    
+      }, [onInput]);
 
-
-    return <>
-        {/* Do I need to display anything?? */}
-        {/* {status} */}
-    </>
+    return <></>
 }
