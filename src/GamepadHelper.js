@@ -2,7 +2,8 @@ import { useEffect } from "react";
 
 let buttonsLastFrame = [];
 
-const handleGamepadInput = (gamepad, callback) => {
+// TODO: Have a way to toglee actOnRelease
+const handleGamepadInput = (gamepad, callback, actOnRelease = false) => {
   const currentButtons = [];
   const pressedButtons = [];
   const releasedButtons = [];
@@ -22,7 +23,7 @@ const handleGamepadInput = (gamepad, callback) => {
     }
   }
   for (let i = 0; i < gamepad.axes.length; i++) {
-    const axisPrefix = `${gamepadPrefix}A${i}-`
+    const axisPrefix = `${gamepadPrefix}A${i}`
     const buttonName = axisPrefix + (gamepad.axes[i] > 0 ? "+" : "-");
     const oppositeButtonName = axisPrefix + (gamepad.axes[i] > 0 ? "-" : "+");
     
@@ -38,22 +39,25 @@ const handleGamepadInput = (gamepad, callback) => {
     }
   }
 
-  // Handle button presses
-  pressedButtons.forEach(button => {
-    if (callback) callback(button + "-press");
-  });
-
-  // Handle button releases
-  releasedButtons.forEach(button => {
-    if (callback) callback(button + "-release");
-  });
+  // TODO: Enable press-and-hold if actOnRelease is on
+  if (actOnRelease) {
+    // Handle button releases
+    releasedButtons.forEach(button => {
+      if (callback) callback(button);
+    });
+  } else {
+    // Handle button presses
+    pressedButtons.forEach(button => {
+      if (callback) callback(button);
+    });
+  }
 
   buttonsLastFrame = currentButtons;
   return currentButtons;
 }
 
 const threshold = 0.5;
-export function GamepadHelper({ onInput }) {
+export function GamepadHelper({ onInput, actOnRelease = false }) {
     useEffect(() => {
         let previousButtons = [];
     
@@ -64,7 +68,7 @@ export function GamepadHelper({ onInput }) {
           for (let i = 0; i < gamepads.length; i++) {
             const gamepad = gamepads[i];
             if (!gamepad) continue;
-            previousButtons = handleGamepadInput(gamepad, onInput);
+            previousButtons = handleGamepadInput(gamepad, onInput, actOnRelease);
           }
         }
     
