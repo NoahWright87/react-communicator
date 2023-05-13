@@ -23,7 +23,7 @@ const handleGamepadInput = (gamepad, callback, actOnRelease = false) => {
     }
   }
   for (let i = 0; i < gamepad.axes.length; i++) {
-    const axisPrefix = `${gamepadPrefix}A${i}`
+    const axisPrefix = `${gamepadPrefix}Axis${i}`
     const buttonName = axisPrefix + (gamepad.axes[i] > 0 ? "+" : "-");
     const oppositeButtonName = axisPrefix + (gamepad.axes[i] > 0 ? "-" : "+");
     
