@@ -20,6 +20,7 @@ export function InputHelper({ buttonActionMap }) {
     // }
 
     const onInput = (input) => {
+        console.log(input);
         if (buttonActionMap[input]) {
             buttonActionMap[input]();
         }

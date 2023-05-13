@@ -7,8 +7,10 @@ const handleGamepadInput = (gamepad, callback) => {
   const pressedButtons = [];
   const releasedButtons = [];
 
+  const gamepadPrefix = `G${gamepad.index}-`;
+
   for (let i = 0; i < gamepad.buttons.length; i++) {
-    const buttonName = "B" + i;
+    const buttonName = `${gamepadPrefix}B${i}`;
 
     if (gamepad.buttons[i].pressed){
       currentButtons.push(buttonName);
@@ -20,8 +22,9 @@ const handleGamepadInput = (gamepad, callback) => {
     }
   }
   for (let i = 0; i < gamepad.axes.length; i++) {
-    const buttonName = "A" + i + (gamepad.axes[i] > 0 ? "+" : "-");
-    const oppositeButtonName = "A" + i + (gamepad.axes[i] > 0 ? "-" : "+");
+    const axisPrefix = `${gamepadPrefix}A${i}-`
+    const buttonName = axisPrefix + (gamepad.axes[i] > 0 ? "+" : "-");
+    const oppositeButtonName = axisPrefix + (gamepad.axes[i] > 0 ? "-" : "+");
     
     if (gamepad.axes[i] > 0.5 || gamepad.axes[i] < -0.5) {
 
@@ -29,24 +32,20 @@ const handleGamepadInput = (gamepad, callback) => {
       if (!buttonsLastFrame.includes(buttonName)) {
         pressedButtons.push(buttonName);
       }
-      
     } else if (buttonsLastFrame.includes(buttonName)
         || buttonsLastFrame.includes(oppositeButtonName)) {
       releasedButtons.push(buttonName);
     }
   }
 
-
   // Handle button presses
   pressedButtons.forEach(button => {
     if (callback) callback(button + "-press");
-    else console.log(button + "-press");
   });
 
   // Handle button releases
   releasedButtons.forEach(button => {
     if (callback) callback(button + "-release");
-    else console.log(button + "-release");
   });
 
   buttonsLastFrame = currentButtons;
