@@ -3,7 +3,7 @@ import { useState } from "react";
 import { PrevNextDisplay } from "./Components/PrevNextDisplay";
 import { InputHelper } from "./InputHelper";
 import { actions } from "./Settings";
-import { playAudio, playVariation, speak } from "./SoundPlayer";
+import { playAudio, playNotes, playVariation, speak } from "./SoundPlayer";
 
 
 export default function CommunicatorDisplay(props) {
@@ -36,7 +36,7 @@ export default function CommunicatorDisplay(props) {
     variationIndex = (variationIndex + variations.length) % variations.length;
     const variation = variations[variationIndex];
 
-    setState(currentMode, currentPhrase, variationIndex, variation?.name, variation?.src);
+    setState(currentMode, currentPhrase, variationIndex, variation?.name, variation?.src, variation?.notes);
   };
 
   const repeat = () => {
@@ -71,12 +71,15 @@ export default function CommunicatorDisplay(props) {
     })
   })
 
-  const setState = (mode, phrase, variation, speech, src) => {
+  const setState = (mode, phrase, variation, speech, src, notes) => {
     setCurrentMode(mode);
     setCurrentPhrase(phrase);
     setCurrentVariation(variation);
 
-    playVariation(variations[variation]);
+    if (src) playAudio(src);
+    else if (notes) playNotes(notes);
+    else if (speech) speak(speech);
+    else playVariation(variations[variation]);
   };
 
   return <Box

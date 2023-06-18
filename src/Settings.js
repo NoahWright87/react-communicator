@@ -1,3 +1,5 @@
+import { furElise, happyBirthday, jingleBells, maryHadaLittleLamb, odeToJoy, twinkleTwinkle } from "./Melodies";
+
 // Map of action names to human-readable strings
 export const actions = {
   nextPhrase: "Next phrase",
@@ -19,73 +21,81 @@ export const settings = {
   phrases: [
     {
       name: "Yes",
-      // speach: "Agree",
       variations: [
         {
-          // src: "yes.mp3",
           name: "Yes.",
-          src: null,
         },
         {
-          // src: "yes2.mp3",
           name: "Yeah?",
-          src: null,
         },
       ],
     },
     {
       name: "No",
-      // speach: "Decline",
       variations: [
         {
           name: "No",
-          src: null,
-          // src: "no.mp3",
         },
         {
-          // src: "no2.mp3",
-          src: null,
           name: "Nope!",
         },
       ],
     },
     {
       name: "One",
-      // speach: "Ones",
       variations: [
         {
-          // src: "one.mp3",
           name: "One",
-          src: null,
         },
         {
-          // src: "one2.mp3",
           name: "Uno!",
-          src: null,
         },
       ],
     },
     {
       name: "Two",
-      // speach: "Twos",
       variations: [
         {
-          // src: "two.mp3",
           name: "Two",
-          src: null,
         },
         {
-          // src: "two2.mp3",
           name: "Dos!",
-          src: null,
         },
       ],
     },
+    {
+      name: "Music synths",
+      variations: [
+        {
+          name: "Mary had a little lamb",
+          notes: maryHadaLittleLamb
+        },
+        {
+          name: "Twinkle twinkle little star",
+          notes: twinkleTwinkle
+        },
+        {
+          name: "Jingle Bells",
+          notes: jingleBells
+        },
+        {
+          name: "Happy Birthday",
+          notes: happyBirthday
+        },
+        {
+          name: "Fur Elise",
+          notes: furElise
+        },
+        {
+          name: "Ode to Joy",
+          notes: odeToJoy
+        }
+      ],
+    }
   ],
   modes: [
     {
       name: "Communication",
-      // speach: "Communication mode",
       phrases: [
         "Yes",
         "No",
@@ -93,12 +103,17 @@ export const settings = {
     },
     {
       name: "Numbers",
-      // speach: "Number mode",
       phrases: [
         "One",
         "Two",
       ],
     },
+    {
+      name: "Music",
+      phrases: [
+        "Music synths",
+      ],
+    }
   ],
   controlSchemes: [
     {
