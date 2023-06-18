@@ -9,6 +9,12 @@ export const actions = {
   repeat: "Repeat",
 }
 
+export const audioTypes = [
+  "tts",
+  "file",
+  "notes",
+]
+
 export const settings = {
   phrases: [
     {

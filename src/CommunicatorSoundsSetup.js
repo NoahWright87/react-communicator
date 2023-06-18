@@ -1,7 +1,9 @@
-import { Add, Delete, Edit } from '@mui/icons-material';
+import FileUploadIcon from '@mui/icons-material/FileUpload';
+import { Add, Close, Delete, Edit, PlayArrow } from '@mui/icons-material';
 import { Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
 import { useRef, useState } from 'react';
 import { AccordionGroup } from './AccordionGroup';
+import { playAudio, playNotes, speak } from './SoundPlayer';
 
 export default function CommunicatorSoundsSetup(props) {
   const currentSettings = props.settings;
@@ -95,6 +97,7 @@ function PhrasesSection(props) {
   const submitDialog = (newPhrase) => {
     addPhrase(newPhrase);
     setDialogOpen(false);
+    setNewPhrase(defaultNewPhrase);
   }
 
 
@@ -246,6 +249,25 @@ function PhraseEditDialog(props) {
     // setVariations(variations.filter((variation) => variation.name !== variationName));
   }
 
+  const inputRef = useRef();
+  const addFiles = (files) => {
+    console.log("addFiles", files);
+
+    // Add a variation for each file
+    const newVariations = [...variations];
+    for (const file of files) {
+      const src = URL.createObjectURL(file);
+      newVariations.push({
+        type: "file",
+        name: file.name,
+        src: src,
+        srcPath: file.webkitRelativePath,
+      });
+    }
+    setVariations(newVariations);
+
+  }
+
 
   return <Dialog
       open={open}
@@ -304,6 +326,22 @@ function PhraseEditDialog(props) {
             >
               Add variation
             </Button>
+            <Button
+              variant="outlined"
+              component="label"
+            >
+              Batch upload
+              <input
+                hidden
+                type="file"
+                ref={inputRef}
+                accept='audio/*'
+                multiple={true}
+                onChange={(e) => {
+                  addFiles(e.target.files);
+                }}
+              />
+            </Button>
           </Box>
           <DialogActions>
             <Button
@@ -337,6 +375,8 @@ function VariationDetails(props) {
   const [variationName, setVariationName] = useState(props.variation.name);
   const [variationSrc, setVariationSrc] = useState(props.variation.src);
   const [variationDisplay, setVariationDisplay] = useState(props.variation.display);
+  const [variationType, setVariationType] = useState(props.variation.type);
+  const [variationNotes, setVariationNotes] = useState(props.variation.notes);
 
   const srcDisplay = variationSrc === null
     ? "None 🔇"
@@ -348,90 +388,218 @@ function VariationDetails(props) {
   const inputRef = useRef();
   const playSrc = (src) => {
     if (src === '') return;
-    const audio = new Audio(src);
-    audio.play();
+    playAudio(src);
   }
-  const chooseFile = (path) => {
-    console.log("Choosing file", path);
+  const chooseFile = (file) => {
+    console.log("Choosing file", file);
 
-    const src = URL.createObjectURL(path);
+    const src = URL.createObjectURL(file);
     playSrc(src);
     updateVariation(props.index, {
       name: variationName,
       src: src,
-      display: path.name ?? src,
+      srcPath: file.path,
+      display: file.name,
     });
     setVariationSrc(src);
-    setVariationDisplay(path.name ?? src);
+    setVariationDisplay(file.name ?? src);
   }
 
-  return <Box
-      key={props.index}
+  const ttsDisplay = <>
+    <TextField
       sx={{
-        display: "flex",
-        flexDirection: "row",
+        flex: 1,
+      }}
+      variant="outlined"
+      label="Words to speak"
+      value={variationName}
+      onChange={(e) => {setVariationName(e.target.value)}}
+      onBlur={() => {
+        updateVariation(props.index, {
+          type: "tts",
+          name: variationName,
+          // src: variationSrc,
+          src: null,
+          display: variationDisplay,
+        });
+      }}
+    />
+    <Button
+      sx={{
+        flex: 0,
+      }}
+      variant="outlined"
+      color="success"
+      onClick={() => {
+        // playSrc(variationSrc);
+        speak(variationName);
       }}
     >
-      {/* Variation name (also the TTS words) */}
-      <TextField
-        variant="outlined"
-        label="Variation name"
-        value={variationName}
-        onChange={(e) => {setVariationName(e.target.value)}}
-        // onBlur={() => {updateVariation(variationName)}}
-        // onBlur={() => console.log("blurrrrr")}
-        onBlur={() => {
-          updateVariation(props.index, {
-            name: variationName,
-            src: variationSrc,
-            display: variationDisplay,
-          });
+      <PlayArrow />
+    </Button>
+  </>
+  const fileDisplay = <>
+    <TextField
+      sx={{
+        flex: 1,
+      }}
+      variant="outlined"
+      label="File name"
+      value={variationDisplay}
+    />
+    <Button
+      sx={{
+        flex: 0,
+      }}
+      variant="outlined"
+      component="label"
+    >
+      <FileUploadIcon />
+      {/* Choose file */}
+      <input
+        hidden
+        type="file"
+        ref={inputRef}
+        accept='audio/*'
+        onChange={(e) => {
+          chooseFile(e.target.files[0]);
         }}
       />
-  
-      {/* Sound source's filename */}
-      <TextField
-        variant="outlined"
-        label="Sound source"
-        // TODO: Only show the filename, not the path
-        // value={props.variation.src ?? ""}
-        // value={variationSrc ?? "🔇"}
-        value={srcDisplay}
-        disabled
-        // TODO: Have a decorator to clear this
-      />
-  
-      {/* Choose sound button */}
-      <Button
-        variant="outlined"
-        // onClick={() => {alert('TODO: Choose sound')}}
-        component="label"
-      >
-        Choose sound
-        <input
-          hidden
-          type="file"
-          ref={inputRef}
-          accept='audio/*'
-          onChange={(e) => {
-            console.log("e.target.files", e.target.files);
-            chooseFile(e.target.files[0]);
+    </Button>
+    <Button
+      sx={{
+        flex: 0,
+      }}
+      variant="outlined"
+      color="success"
+      onClick={() => {
+        playSrc(variationSrc);
+      }}
+      enabled={variationSrc !== null}
+    >
+      <PlayArrow />
+    </Button>
+  </>
+
+  const notesDisplay = <>
+    <TextField
+      sx={{
+        // width: "25%",
+        flex: 1,
+      }}
+      variant="outlined"
+      label="Name"
+      value={variationDisplay}
+      onChange={(e) => {setVariationDisplay(e.target.value)}}
+      onBlur={() => {
+        updateVariation(props.index, {
+          name: variationName,
+          notes: variationNotes,
+          src: null,
+          display: variationDisplay,
+        });
+      }}
+    />
+    <TextField
+      sx={{
+        flex: 2,
+      }}
+      variant="outlined"
+      label="Notes"
+      value={variationNotes}
+      onChange={(e) => {setVariationNotes(e.target.value)}}
+      onBlur={() => {
+        updateVariation(props.index, {
+          name: variationName,
+          notes: variationNotes,
+          src: null,
+          display: variationDisplay,
+        });
+      }}
+    />
+    <Button
+      sx={{
+        flex: 0,
+      }}
+      variant="outlined"
+      color='success'
+      onClick={() => {
+        // playSrc(variationSrc);
+        playNotes(variationNotes);
+      }}
+    >
+      <PlayArrow />
+    </Button>
+  </>
+
+  const typeDisplay = <>
+    <FormControl
+      variant="outlined"
+      sx={{
+        minWidth: 120,
+        width: "25%",
+        // flex: 0.5,
+      }}
+    >
+      <InputLabel id="variation-type-label">Type</InputLabel>
+      <Select
+        labelId="variation-type-label"
+        value={variationType}
+        >
+        <MenuItem
+          value="tts"
+          onClick={() => {
+            setVariationType("tts");
           }}
-        />
-      </Button>
-  
-      {/* Remove sound button */}
-      <Button
-        variant="contained"
-        color="error"
-        onClick={() => {deleteVariation(props.index)}}
-      >
-        X
-      </Button>
+        >
+          Text to speech
+        </MenuItem>
+        <MenuItem
+          value="file"
+          onClick={() => {
+            setVariationType("file");
+          }}
+        >
+          File
+        </MenuItem>
+        <MenuItem
+          value="notes"
+          onClick={() => {
+            setVariationType("notes");
+          }}
+        >
+          Notes
+        </MenuItem>
+      </Select>
+    </FormControl>
+  </>
 
-
-      {/* TODO EVENTUALLY: Let them pick from default sounds */}
-    </Box>
+  return <Box
+    key={props.index}
+    sx={{
+      display: "flex",
+      flexDirection: "row",
+      my: 1,
+    }}
+  >
+    {typeDisplay}
+    {variationType === "tts" && ttsDisplay}
+    {variationType === "file" && fileDisplay}
+    {variationType === "notes" && notesDisplay}
+    <Button
+      sx={{
+        flex: 0,
+        ml: "auto",
+      }}
+      variant="outlined"
+      color="error"
+      size="xs"
+      
+      onClick={() => {deleteVariation(props.index)}}
+    >
+      <Close />
+    </Button>
+  </Box>
 }
 function ModesSection(props) {
   const [dialogOpen, setDialogOpen] = useState(false);

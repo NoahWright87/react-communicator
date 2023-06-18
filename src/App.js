@@ -10,6 +10,7 @@ import { settings } from './Settings';
 import { CommunicatorSaveLoad } from './CommmunicatorSaveLoad';
 import CommunicatorInputSetup from './CommunicatorInputSetup';
 import { InputHelper } from './InputHelper';
+import ToneJsTest from './ToneJsTest';
 
 function App() {
   const [currentSettings, setSettings] = useState({settings});
@@ -31,6 +32,10 @@ function App() {
   // TODO: Give a way for each content to know if it is active.  That way things
   // can be disabled and not listening for input if not active.
   const accordionContents = [
+    // {
+    //   title: 'Tone.js Test',
+    //   content: <ToneJsTest />,
+    // },
     {
       title: 'Save / Load',
       content: <CommunicatorSaveLoad 

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { PrevNextDisplay } from "./Components/PrevNextDisplay";
 import { InputHelper } from "./InputHelper";
 import { actions } from "./Settings";
+import { playAudio, playVariation, speak } from "./SoundPlayer";
 
 
 export default function CommunicatorDisplay(props) {
@@ -39,11 +40,7 @@ export default function CommunicatorDisplay(props) {
   };
 
   const repeat = () => {
-    if (variations[currentVariation].src) {
-      playAudio(variations[currentVariation].src);
-    } else if (variations[currentVariation].name) {
-      speak(variations[currentVariation].name);
-    }
+    playVariation(variations[currentVariation]);
   }
 
   const getActionForName = (name) => {
@@ -79,11 +76,7 @@ export default function CommunicatorDisplay(props) {
     setCurrentPhrase(phrase);
     setCurrentVariation(variation);
 
-    if (src) {
-      playAudio(src);
-    } else if (speech) {
-      speak(speech);
-    }
+    playVariation(variations[variation]);
   };
 
   return <Box
@@ -130,33 +123,4 @@ export default function CommunicatorDisplay(props) {
       </Button>
     </Box>
   </Box>
-}
-
-let lastAudio = null;
-function speak(words) {
-  stopSounds();
-  if (window.speechSynthesis) {
-    const utterance = new SpeechSynthesisUtterance(words);
-    window.speechSynthesis.speak(utterance);
-  }
-}
-
-function playAudio(src) {
-  stopSounds();
-  if (!src) {
-    return;
-  }
-  const audio = new Audio(src);
-  lastAudio = audio;
-  audio.play();
-}
-
-function stopSounds() {
-  if (lastAudio) {
-    lastAudio.pause();
-    lastAudio.currentTime = 0;
-  }
-  if (window.speechSynthesis) {
-    window.speechSynthesis.cancel();
-  }
 }
