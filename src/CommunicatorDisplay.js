@@ -44,7 +44,6 @@ export default function CommunicatorDisplay(props) {
   }
 
   const getActionForName = (name) => {
-    // console.log(name);
     switch(name) {
       case actions.nextMode:
         return () => setModeAndSpeak(currentMode+1);
@@ -108,7 +107,7 @@ export default function CommunicatorDisplay(props) {
     />
     <PrevNextDisplay
       title="Variation"
-      items={variations.map(variation => variation.name)}
+      items={variations.map(variation => variation.name ?? currentVariation)}
       index={currentVariation}
       setter={setVariationAndSpeak}
     />

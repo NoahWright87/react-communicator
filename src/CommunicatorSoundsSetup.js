@@ -1,5 +1,5 @@
 import FileUploadIcon from '@mui/icons-material/FileUpload';
-import { Add, Close, Delete, Edit, PlayArrow } from '@mui/icons-material';
+import { Add, Close, Delete, Edit, PlayArrow, UploadFile } from '@mui/icons-material';
 import { Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
 import { useRef, useState } from 'react';
 import { AccordionGroup } from './AccordionGroup';
@@ -8,6 +8,13 @@ import { playAudio, playNotes, speak } from './SoundPlayer';
 export default function CommunicatorSoundsSetup(props) {
   const currentSettings = props.settings;
   const setSettings = props.setSettings;
+
+  const setModesAndPhrases = (modes, phrases) => {
+    const newSettings = { ...currentSettings };
+    newSettings.settings.phrases = phrases;
+    newSettings.settings.modes = modes;
+    setSettings(newSettings);
+  }
 
   const setPhrase = (phrase, index) => {
     const newSettings = { ...currentSettings };
@@ -24,7 +31,7 @@ export default function CommunicatorSoundsSetup(props) {
     newSettings.settings.phrases.splice(index, 1);
     setSettings(newSettings);
   }
-
+  
   const setMode = (mode, index) => {
     const newSettings = { ...currentSettings };
     newSettings.settings.modes[index] = mode;
@@ -33,6 +40,11 @@ export default function CommunicatorSoundsSetup(props) {
   const addMode = (newMode) => {
     const newSettings = { ...currentSettings };
     newSettings.settings.modes.push(newMode);
+    var missingPhrases = newMode.phrases.filter(p => !newSettings.settings.phrases.find(p2 => p2.name === p));
+    missingPhrases.forEach(p => {
+      newSettings.settings.phrases.push({ name: p, variations: [] });
+    });
+
     setSettings(newSettings);
   }
   const deleteMode = (index) => {
@@ -48,7 +60,6 @@ export default function CommunicatorSoundsSetup(props) {
           title: "Phrases",
           content: <PhrasesSection 
             phrases={currentSettings.settings.phrases}
-            // setPhrases={setSettings}
             setPhrase={setPhrase}
             addPhrase={addPhrase}
             deletePhrase={deletePhrase}
@@ -61,15 +72,17 @@ export default function CommunicatorSoundsSetup(props) {
             updateMode={setMode}
             addMode={addMode}
             deleteMode={deleteMode}
+            phrases={currentSettings.settings.phrases}
+            setModesAndPhrases={setModesAndPhrases}
             availablePhrases={currentSettings.settings.phrases}
           />
         },
-        {
-          title: "Text-to-speach",
-          content: <div>TODO: TTS options</div>
-          // TODO: Choose voice option for TTS
-          // e.g.: window.speechSynthesis.getVoices()
-        },
+        // {
+        //   title: "Text-to-speach",
+        //   content: <div>TODO: TTS options</div>
+        //   // TODO: Choose voice option for TTS
+        //   // e.g.: window.speechSynthesis.getVoices()
+        // },
       ]}
     />
     
@@ -98,6 +111,9 @@ function PhrasesSection(props) {
     addPhrase(newPhrase);
     setDialogOpen(false);
     setNewPhrase(defaultNewPhrase);
+  }
+  const cancelDialog = () => {
+    setDialogOpen(false);
   }
 
 
@@ -134,7 +150,7 @@ function PhrasesSection(props) {
         <PhraseEditDialog
           open={dialogOpen}
           submit={submitDialog}
-          cancel={() => {setDialogOpen(false)}}
+          cancel={cancelDialog}
           phrase={newPhrase}
         />
       </Box>
@@ -143,7 +159,7 @@ function PhrasesSection(props) {
 }
 function PhraseDetails(props) {
   const [openDialog, setOpenDialog] = useState(false);
-  const phrase = props.phrase;
+  const phrase = props.phrase.phrase ?? props.phrase;
   const setPhrase = props.setPhrase;
   const deletePhrase = props.deletePhrase;
 
@@ -216,26 +232,34 @@ function PhraseEditDialog(props) {
   const [name, setName] = useState(props.phrase.name);
   const [variations, setVariations] = useState(props.phrase.variations);
 
+  const clearFields = () => {
+    setName(props.phrase.name);
+    setVariations(props.phrase.variations);
+  }
+  const cancelClick = () => {
+    cancel();
+    clearFields();
+  }
+
+  const submitClick = () => {
+    submit({
+      name: name,
+      variations: variations,
+    });
+    clearFields();
+  }
+
   const addVariation = () => {
     setVariations([...variations, {
       name: "",
       src: null,
+      type: "tts",
     }]);
   }
   const updateVariation = (index, variation) => {
-    console.log("updateVariation", index, variation);
-
     const newVariations = [...variations];
     newVariations[index] = variation;
     setVariations(newVariations);
-
-
-    // setVariations(variations.map((variation, i) => {
-    //   if (i === from) {
-    //     return to;
-    //   }
-    //   return variation;
-    // }));
   }
   const deleteVariation = (i) => {
     console.log("TODO: Delete variation index " + i);
@@ -243,35 +267,37 @@ function PhraseEditDialog(props) {
     newVariations.splice(i, 1);
     console.log("newVariations", newVariations);
     setVariations(newVariations);
-    // setVariations(variations.filter((variation, index) => index !== i));
-
-    // setVariations(variations.filter((variation, i) => i !== index));
-    // setVariations(variations.filter((variation) => variation.name !== variationName));
   }
 
   const inputRef = useRef();
   const addFiles = (files) => {
-    console.log("addFiles", files);
-
     // Add a variation for each file
     const newVariations = [...variations];
-    for (const file of files) {
-      const src = URL.createObjectURL(file);
-      newVariations.push({
-        type: "file",
-        name: file.name,
-        src: src,
-        srcPath: file.webkitRelativePath,
-      });
-    }
-    setVariations(newVariations);
 
+    let proms = [];
+    for (const file of files) {
+      const fileReader = new FileReader();
+      proms.push(new Promise((resolve, reject) => {
+        fileReader.onload = () => {
+          newVariations.push({
+            type: "file",
+            name: file.name,
+            src: fileReader.result,
+          });
+          resolve();
+        }
+        fileReader.readAsDataURL(file);
+      }));
+    }
+    Promise.all(proms).then(() => {
+      setVariations(newVariations);
+    });
   }
 
 
   return <Dialog
       open={open}
-      onClose={cancel}
+      onClose={cancelClick}
       // key={name}
     >
       <DialogTitle>
@@ -346,20 +372,14 @@ function PhraseEditDialog(props) {
           <DialogActions>
             <Button
               onClick={() => {
-                // console.log("saving phrase", name, variations);
-                submit({
-                  name: name,
-                  variations: variations,
-                });
+                submitClick();
               }}
             >
               Save
             </Button>
             <Button
               onClick={() => {
-                setName(props.phrase.name);
-                setVariations(props.phrase.variations);
-                cancel();
+                cancelClick();
               }}
               color="warning"
             >
@@ -393,16 +413,20 @@ function VariationDetails(props) {
   const chooseFile = (file) => {
     console.log("Choosing file", file);
 
-    const src = URL.createObjectURL(file);
-    playSrc(src);
-    updateVariation(props.index, {
-      name: variationName,
-      src: src,
-      srcPath: file.path,
-      display: file.name,
-    });
-    setVariationSrc(src);
-    setVariationDisplay(file.name ?? src);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const src = e.target.result;
+      playSrc(src);
+      updateVariation(props.index, {
+        name: variationName ?? file.name,
+        src: src,
+        srcPath: file.path,
+        display: file.name,
+      });
+      setVariationSrc(src);
+      setVariationDisplay(file.name ?? src);
+    }
+    reader.readAsDataURL(file);
   }
 
   const ttsDisplay = <>
@@ -445,7 +469,7 @@ function VariationDetails(props) {
       }}
       variant="outlined"
       label="File name"
-      value={variationDisplay}
+      value={srcDisplay}
     />
     <Button
       sx={{
@@ -615,6 +639,83 @@ function ModesSection(props) {
     setDialogOpen(false);
   }
 
+  const inputRef = useRef();
+  const importFolders = (folders) => {
+    const modes = props.modes.slice();
+    const phrases = props.phrases.slice();
+
+    for(const folder of folders) {
+      const parts = folder.webkitRelativePath.split("/");
+      // Make sure we have mode + phrase + variation
+      if (parts.length < 3) {
+        continue;
+      }
+
+      const variationName = parts[parts.length - 1];
+      const phraseName = parts[parts.length - 2];
+      const modeName = parts[parts.length - 3];
+
+      // Check for existing mode
+      let mode = modes.find((mode) => {
+        return mode.name === modeName;
+      });
+      if (mode === undefined) {
+        mode = {
+          name: modeName,
+          phrases: [],
+        };
+      }
+
+      // Check for existing phrase
+      let phrase = phrases.find((phrase) => {
+        return phrase.name === phraseName;
+      });
+      if (phrase === undefined) {
+        phrase = {
+          name: phraseName,
+          variations: [],
+        };
+        phrases.push(phrase);
+      }
+      // Does the mode already have this phrase?
+      const matchingPhrase = mode.phrases.find((phrase) => {
+        return phrase.name === phraseName;
+      });
+      if (matchingPhrase === undefined) {
+        mode.phrases.push(phrase);
+      }
+      
+      // Check for existing variation
+      let variation = phrase.variations.find((variation) => {
+        return variation.name === variationName;
+      });
+      if (variation === undefined) {
+        const reader = new FileReader();
+        reader.readAsDataURL(folder);
+        reader.onload = () => {
+          const src = reader.result;
+          variation = {
+            type: "file",
+            name: variationName,
+            src: src,
+            display: variationName,
+            notes: "",
+          };
+          phrase.variations.push(variation);
+        }
+      }
+
+      // Add mode if it's new
+      const matchingMode = props.modes.find((mode) => {
+        return mode.name === modeName;
+      });
+      if (matchingMode === undefined) {
+        props.addMode(mode);
+      }
+    }
+    props.setModesAndPhrases(modes, phrases);
+  }
+
   return <>
     {/* List of modes */}
     <Box
@@ -645,6 +746,29 @@ function ModesSection(props) {
       >
         <Add />
         Add mode
+      </Button>
+      <Button
+        variant="outlined"
+        color="success"
+        component="label"
+        sx={{
+          ml: 1,
+        }}
+      >
+        <UploadFile />
+        Import folder(s)
+        <input
+          type="file"
+          ref={inputRef}
+          onChange={(e) => {
+            importFolders(e.target.files);
+            inputRef.current.value = "";
+          }}
+          style={{display: "none"}}
+          webkitdirectory=""
+          mozdirectory=""
+          directory=""
+        />
       </Button>
     </Box>
 
@@ -697,7 +821,7 @@ function ModeDetails(props) {
       {props.mode.phrases.map((phrase, i) => {
         return <Chip
           key={i}
-          label={phrase}
+          label={phrase.name ?? phrase}
         />
       })}
     </Box>
@@ -741,16 +865,21 @@ function ModeEditDialog(props) {
   const [name, setName] = useState(mode.name);
   const [phrases, setPhrases] = useState(mode.phrases);
 
+  const clearFields = () => {
+    setName(mode.name);
+    setPhrases(mode.phrases);
+  }
+
   const submit = () => {
     props.submit({
       name: name,
       phrases: phrases,
     });
+    clearFields();
   }
   const cancel = () => {
-    setName(mode.name);
-    setPhrases(mode.phrases);
     props.cancel();
+    clearFields();
   }
 
 

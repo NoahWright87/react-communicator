@@ -1,3 +1,4 @@
+import { Cookie, FileDownload, FileUpload } from "@mui/icons-material";
 import { Box, Button } from "@mui/material";
 import { useRef } from "react";
 
@@ -34,7 +35,7 @@ export function CommunicatorSaveLoad(props) {
         const blob = new Blob([settingsString], {type: 'text/plain'});
         const link = document.createElement('a');
         link.href = window.URL.createObjectURL(blob);
-        link.download = settings.filename;
+        link.download = settings.filename ?? "settings.json";
         link.click();
     }
     const load = (file) => {
@@ -49,6 +50,18 @@ export function CommunicatorSaveLoad(props) {
         }
         reader.readAsText(file);
     }
+    const saveToCookie = () => {
+        const settingsString = JSON.stringify(settings);
+        localStorage.setItem('settings', settingsString);
+    }
+    const loadFromCookie = () => {
+        // Load from local storage
+        const loadedSettingsString = localStorage.getItem('settings');
+        if (loadedSettingsString) {
+            const loadedSettings = JSON.parse(loadedSettingsString);
+            setSettings(loadedSettings);
+        }
+    }
 
     return <>
         <Box
@@ -58,18 +71,37 @@ export function CommunicatorSaveLoad(props) {
                 justifyContent: 'center',
             }}
         >
-            {/* <Button
-                disabled={!hasChanges}
-                hidden={settings.filename === ""}
-                onClick={() => {
-                    save();
-                }}
-            >
-                {hasChanges
-                    ? "Save changes"
-                    : "-No changes-"}
-            </Button> */}
             <Button
+                sx={{
+                    mx: 0.5,
+                }}
+                // disabled={!hasChanges}
+                onClick={() => {
+                    saveToCookie();
+                }}
+                variant="contained"
+            >
+                <Cookie />&nbsp;Save changes
+                {/* {hasChanges
+                    ? <><Cookie />&nbsp;Save changes</>
+                    : <><Cookie />&nbsp;<em>No changes</em></>} */}
+            </Button>
+            <Button
+                sx={{
+                    mx: 0.5,
+                }}
+                onClick={() => {
+                    loadFromCookie();
+                }}
+                variant="contained"
+            >
+                <Cookie /> Load
+            </Button>
+
+            <Button
+                sx={{
+                    mx: 0.5,
+                }}
                 variant="contained"
                 size="large"
                 component="label"
@@ -77,6 +109,7 @@ export function CommunicatorSaveLoad(props) {
                     save();
                 }}
             >
+                <FileDownload />&nbsp;
                 Save
                 {hasChanges && <span>*</span>}
                 {/* <input
@@ -91,10 +124,14 @@ export function CommunicatorSaveLoad(props) {
                 /> */}
             </Button>
             <Button
+                sx={{
+                    mx: 0.5,
+                }}
                 variant="contained"
                 component="label"
                 size="large"
             >
+                <FileUpload />&nbsp;
                 Load
                 <input
                     hidden
