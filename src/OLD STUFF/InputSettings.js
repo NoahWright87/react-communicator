@@ -6,6 +6,7 @@ export function InputSettings() {
 
 }
 
+// TODO: better name???
 export function ButtonGroupSettings(buttonGroup) {
   const [isListening, setIsListening] = useState(false);
   const [buttonsPressed, setButtonsPressed] = useState([]);
