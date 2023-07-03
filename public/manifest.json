@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Communicator",
+  "name": "Communicator -- A web tool for nonverbal communication",
   "icons": [
     {
       "src": "favicon.ico",
