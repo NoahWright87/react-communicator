@@ -28,7 +28,8 @@ export function KeyboardHelper({ onInput }) {
             returnString += "-release";
         }
 
-        return { device: "Keyboard", name: returnString } ;
+        // TODO: Change value to 0 for keyup??
+        return { device: "Keyboard", name: returnString, value: 1 } ;
     };
 
     useEffect(() => {
@@ -36,10 +37,11 @@ export function KeyboardHelper({ onInput }) {
             if (onInput) {
                 const inputEvent = getInputEventFromKeyEvent(e);
                 if (inputEvent) {
-                    const input = {
-                      name: inputEvent,
-                      device: "Keyboard",  
-                    };
+                    // const input = {
+                    //   name: inputEvent,
+                    //   device: "Keyboard",
+                    //   value: 1,
+                    // };
                     onInput(inputEvent);
                     // onInput(inputEvent, "keyboard");
                 }

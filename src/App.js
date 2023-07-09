@@ -21,20 +21,15 @@ const rumbleStrong = (strong) => rumble(0, strong.amount);
 
 const rumble = (weak, strong) => {
   navigator.getGamepads().forEach(gamepad => {
+    if (!gamepad?.vibrationActuator) return;
     gamepad.vibrationActuator.playEffect("dual-rumble", {
       startDelay: 0,
-      duration: 1000,
+      duration: 250,
       weakMagnitude: weak,
       strongMagnitude: strong,
     });
   });
 }
-
-const playSynth = (note) => {
-  console.log("play synth", note);
-  playNotes(note);
-}
-
 
 const createTtsActions = (phrases) => {
   return phrases.map(phrase => {
@@ -62,6 +57,8 @@ const createSynthActions = (songList) => {
 const synthActions = {
   Music1: createSynthActions([
     "E4",
+    "E5",
+    "E6",
     // "E D C D E E E D D D E G G E D C D E E E E D D E D C", // Mary Had a Little Lamb
     // TODO: Lots more songs
   ]),
@@ -184,24 +181,28 @@ const actionButtonInfo = [
     actions: ttsActions.JJJ,
     inputs: [
       "DualShock: B12",
+      "Keyboard: Digit5",
     ],
   },
   {
     actions: ttsActions.Shhh,
     inputs: [
       "DualShock: B13",
+      "Keyboard: Digit6",
     ],
   },
   {
     actions: ttsActions.ChCh,
     inputs: [
       "DualShock: B14",
+      "Keyboard: Digit7",
     ],
   },
   {
     actions: ttsActions.Mmmm,
     inputs: [
       "DualShock: B15",
+      "Keyboard: Digit8",
     ],
   },
 
@@ -210,26 +211,39 @@ const actionButtonInfo = [
     actions: null,
     inputs: [
       "DualShock: B4",
+      "Keyboard: Digit9",
     ],
   },
   {
     actions: null,
     inputs: [
       "DualShock: B5",
+      "Keyboard: Digit0",
     ],
   },
 
   // Triggers
   {
-    actions: [rumbleWeak],
+    actions: [
+      {callback: rumbleWeak, args: 0.3},
+      {callback: rumbleWeak, args: 0.6},
+      {callback: rumbleWeak, args: 1.0},
+    ],
     inputs: [
       "DualShock: B6",
+      "Keyboard: BracketLeft",
+
     ],
   },
   {
-    actions: [rumbleStrong],
+    actions: [
+      {callback: rumbleStrong, args: 0.3},
+      {callback: rumbleStrong, args: 0.6},
+      {callback: rumbleStrong, args: 1.0},
+    ],
     inputs: [
       "DualShock: B7",
+      "Keyboard: BracketRight",
     ],
   },
 
@@ -238,18 +252,21 @@ const actionButtonInfo = [
     actions: null,
     inputs: [
       "DualShock: B8",
+      "Keyboard: Minus",
     ],
   },
   {
     actions: null,
     inputs: [
       "DualShock: B9",
+      "Keyboard: Equal",
     ],
   },
   {
     actions: null,
     inputs: [
       "DualShock: B16",
+      "Keyboard: Enter",
     ],
   },
 
@@ -272,24 +289,28 @@ const actionButtonInfo = [
     actions: pitchUp,
     inputs: [
       "DualShock: Axis0+",
+      "Keyboard: ArrowUp",
     ],
   },
   {
     actions: pitchDown,
     inputs: [
       "DualShock: Axis0-",
+      "Keyboard: ArrowDown",
     ],
   },
   {
     actions: volumeUp,
     inputs: [
       "DualShock: Axis1+",
+      "Keyboard: ArrowRight",
     ],
   },
   {
     actions: volumeDown,
     inputs: [
       "DualShock: Axis1-",
+      "Keyboard: ArrowLeft",
     ],
   },
 
@@ -297,24 +318,28 @@ const actionButtonInfo = [
     actions: tempoUp,
     inputs: [
       "DualShock: Axis2+",
+      "Keyboard: KeyW",
     ],
   },
   {
     actions: tempoDown,
     inputs: [
       "DualShock: Axis2-",
+      "Keyboard: KeyS",
     ],
   },
   {
     actions: volumeUp,
     inputs: [
       "DualShock: Axis3+",
+      "Keyboard: KeyD",
     ],
   },
   {
     actions: volumeDown,
     inputs: [
       "DualShock: Axis3-",
+      "Keyboard: KeyA",
     ],
   },
 
@@ -397,19 +422,27 @@ function App() {
   }
 
   const onInput = (args) => {
-    // console.log(event, device);
-    // console.log(args?.name);
     if (!args?.name) return;
-    // emitter.emit(args.name, args);
-    // addMessage(args.device + ": " + args.name);
 
     const key = args.device + ": " + args.name;
 
     actionButtonInfo.forEach(actionButtonInfo => {
       if (actionButtonInfo.inputs.includes(key)) {
-        actionButtonInfo.actions.forEach(action => {
-          action.callback(action.args);
-        })
+        if (!actionButtonInfo?.actions?.length) {
+          console.debug("No actions mapped to button: ", key);
+          return;
+        }
+        if (actionButtonInfo.currentIndex === undefined) {
+          actionButtonInfo.currentIndex = 0;
+        }
+        actionButtonInfo.currentIndex = (actionButtonInfo.currentIndex + 1) % actionButtonInfo.actions.length;
+        // actionButtonInfo.actions.forEach(action => {
+        //   action.callback({notes: action.args, value: args?.value ?? 0});
+        // })
+        actionButtonInfo.actions[actionButtonInfo.currentIndex].callback({
+          args: actionButtonInfo.actions[actionButtonInfo.currentIndex].args, 
+          value: args?.value ?? 0
+        });
       }
     });
   }

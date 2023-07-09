@@ -5,6 +5,59 @@ const deviceNameMap = {
   "Wireless Controller (STANDARD GAMEPAD Vendor: 054c Product: 09cc)": "DualShock",
 }
 
+let gamePadState = {
+  "DualShock": {
+    lastFrame: {},
+    thisFrame: {},
+  },
+}
+
+const handleGamepadInput_new = (gamepad, callback, actOnRelease = false) => {
+  const deviceName = deviceNameMap[gamepad.id] || gamepad.id;
+  
+  if (gamePadState[deviceName] === undefined) {
+    // gamePadState[deviceName] = {
+    //   lastFrame: [],
+    //   thisFrame: [],
+    // };
+
+    gamePadState[deviceName] = {
+      lastFrame: gamepad,
+      thisFrame: gamepad,
+    };
+  }
+  gamePadState[deviceName].lastFrame = gamePadState[deviceName].thisFrame;
+  gamePadState[deviceName].thisFrame = gamepad;
+
+  const changedButtons = [];
+  
+  gamepad.buttons.forEach((button, index) => {
+    const buttonName = `B${index}`;
+    const key = { deviceName, buttonName };
+    
+    const lastFrameButton = gamePadState[deviceName].lastFrame.buttons[index];
+    if (button.value !== lastFrameButton.value) {
+      changedButtons.push({device: deviceName, name: buttonName, value: button.value});
+    };
+  });
+
+  gamepad.axes.forEach((axis, index) => {
+    const axisName = `Axis${index}`;
+    const key = { deviceName, axisName };
+
+    const lastFrameAxis = gamePadState[deviceName].lastFrame.axes[index];
+    if (axis !== lastFrameAxis) {
+      changedButtons.push({device: deviceName, name: axisName, value: axis});
+    }
+  });
+
+  if (changedButtons.length > 0) {
+    changedButtons.forEach(changedButton => {
+      callback(changedButton);
+    });
+  }
+}
+
 let buttonsLastFrame = [];
 
 // TODO: Have a way to toggle actOnRelease
@@ -105,7 +158,7 @@ export function GamepadHelper({ onInput, actOnRelease = false }) {
           for (let i = 0; i < gamepads.length; i++) {
             const gamepad = gamepads[i];
             if (!gamepad) continue;
-            previousButtons = handleGamepadInput(gamepad, onInput, actOnRelease);
+            previousButtons = handleGamepadInput_new(gamepad, onInput, actOnRelease);
           }
         }
     

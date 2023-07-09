@@ -13,7 +13,9 @@ export function playVariation(variation) {
   }
 }
 
-export function playNotes(notes) {
+export function playNotes(input) {
+  const notes = input.args;
+  const value = input.value;
   stopSounds();
   const parsedNotes = notes.split(" ").map((note) => {
         if (note === "_") {
@@ -63,10 +65,11 @@ export function stopSounds() {
   }
 }
 
-export function speak(words) {
+export function speak(input) {
+  if (!input?.args) { return; }
   stopSounds();
   if (window.speechSynthesis) {
-    const utterance = new SpeechSynthesisUtterance(words);
+    const utterance = new SpeechSynthesisUtterance(input.args);
     window.speechSynthesis.speak(utterance);
   }
 }
