@@ -3,7 +3,7 @@ import { useEffect } from "react";
 
 export function KeyboardHelper({ onInput }) {
     // Listen for keyboard input, call inInput with the input
-    const inputName = (e) => {
+    const getInputEventFromKeyEvent = (e) => {
         let returnString = e.code;
         // Ignore modifier keys
         if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) {
@@ -28,15 +28,20 @@ export function KeyboardHelper({ onInput }) {
             returnString += "-release";
         }
 
-        return returnString;
+        return { device: "Keyboard", name: returnString } ;
     };
 
     useEffect(() => {
         const handleKeyEvent = (e) => {
             if (onInput) {
-                const input = inputName(e);
-                if (input) {
-                    onInput(input);
+                const inputEvent = getInputEventFromKeyEvent(e);
+                if (inputEvent) {
+                    const input = {
+                      name: inputEvent,
+                      device: "Keyboard",  
+                    };
+                    onInput(inputEvent);
+                    // onInput(inputEvent, "keyboard");
                 }
             }
         };
@@ -47,7 +52,7 @@ export function KeyboardHelper({ onInput }) {
             window.removeEventListener("keydown", handleKeyEvent);
             window.removeEventListener("keyup", handleKeyEvent);
         };
-    }, [onInput]);
+    }, [onInput()]);
 
 
     return <></>;

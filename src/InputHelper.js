@@ -6,37 +6,32 @@ import { KeyboardHelper } from "./KeyboardHelper";
 import { GamepadHelper } from "./GamepadHelper";
 
 
-export function InputHelper({ buttonActionMap }) {
-    // const buttonActionMap = {
-    //     "ArrowLeft": () => changeNumber(-1),
-    //     "ArrowRight": () => changeNumber(1),
-    //     "ArrowUp": () => changeNumber(10),
-    //     "ArrowDown": () => changeNumber(-10),
-    // }
-
-    // const [number, setNumber] = useState(0);
-    // const changeNumber = (amount) => {
-    //     setNumber(number + amount);
-    // }
+export function InputHelper({ callback }) {
+// export function InputHelper({ buttonActionMap }) {
+    
 
     const onInput = (input) => {
-        console.log(input);
-        if (buttonActionMap[input]) {
-            buttonActionMap[input]();
-        }
+        console.debug(input);
+
+        callback(input);
     }
 
-    return <Box
-        sx={{
-            display: 'flex',
-            flexDirection: 'column'
-        }}
-    >
-        <KeyboardHelper
-            onInput={onInput}
-        />
-        <GamepadHelper
-            onInput={onInput}
-        />
-    </Box>;
+    // const onInput = (input) => {
+    //     console.debug(input);
+    //     // if (buttonActionMap[input]) {
+    //     //     buttonActionMap[input]();
+    //     // }
+
+    //     callback(input);
+    // }
+
+  return <>
+    <KeyboardHelper
+        onInput={onInput}
+    />
+    <GamepadHelper
+        onInput={onInput}
+    />
+    {/* TODO: MouseHelper */}
+  </>
 }

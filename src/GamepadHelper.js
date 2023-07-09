@@ -1,55 +1,92 @@
 import { useEffect } from "react";
 
+// Check https://gist.github.com/nondebug/aec93dff7f0f1969f4cc2291b24a3171 for a list of gamepad ids
+const deviceNameMap = {
+  "Wireless Controller (STANDARD GAMEPAD Vendor: 054c Product: 09cc)": "DualShock",
+}
+
 let buttonsLastFrame = [];
 
-// TODO: Have a way to toglee actOnRelease
+// TODO: Have a way to toggle actOnRelease
+// TODO: Actually look for change in value and fire an onChange event
+// TODO: Move event emitter into this class
 const handleGamepadInput = (gamepad, callback, actOnRelease = false) => {
   const currentButtons = [];
   const pressedButtons = [];
   const releasedButtons = [];
 
-  const gamepadPrefix = `G${gamepad.index}-`;
+  // TODO: Change this to gamepad name
+  const deviceName = deviceNameMap[gamepad.id] || gamepad.id;
+  const gamepadPrefix = deviceName + ":";
+  // const gamepadPrefix = `G${gamepad.index}-`;
 
   for (let i = 0; i < gamepad.buttons.length; i++) {
-    const buttonName = `${gamepadPrefix}B${i}`;
+    const buttonName = `B${i}`;
+    const key = { deviceName, buttonName };
+    // const eventArgs = {
+    //   deviceName,
+    //   buttonName,
+    //   value: buttons[i].value
+    // };
+    const gamepadButtonName = `${gamepadPrefix}B${i}`;
 
     if (gamepad.buttons[i].pressed){
-      currentButtons.push(buttonName);
-      if (!buttonsLastFrame.includes(buttonName)) {
-        pressedButtons.push(buttonName);
+      currentButtons.push(key);
+      if (!buttonsLastFrame.includes(key)) {
+        pressedButtons.push(key);
       }
-    } else if (buttonsLastFrame.includes(buttonName)) {
-      releasedButtons.push(buttonName);
+    } else if (buttonsLastFrame.includes(key)) {
+      releasedButtons.push(key);
     }
   }
   for (let i = 0; i < gamepad.axes.length; i++) {
-    const axisPrefix = `${gamepadPrefix}Axis${i}`
+    
+    const axisPrefix = `Axis${i}`
+    // const axisPrefix = `${gamepadPrefix}Axis${i}`
     const buttonName = axisPrefix + (gamepad.axes[i] > 0 ? "+" : "-");
     const oppositeButtonName = axisPrefix + (gamepad.axes[i] > 0 ? "-" : "+");
     
+    const key = { deviceName, buttonName };
+    const oppositeKey = { deviceName, buttonName: oppositeButtonName };
+
     if (gamepad.axes[i] > 0.5 || gamepad.axes[i] < -0.5) {
 
-      currentButtons.push(buttonName);
-      if (!buttonsLastFrame.includes(buttonName)) {
-        pressedButtons.push(buttonName);
+      currentButtons.push(key);
+      if (!buttonsLastFrame.includes(key)) {
+        pressedButtons.push(key);
       }
-    } else if (buttonsLastFrame.includes(buttonName)
-        || buttonsLastFrame.includes(oppositeButtonName)) {
-      releasedButtons.push(buttonName);
+    } else if (buttonsLastFrame.includes(key)
+        || buttonsLastFrame.includes(oppositeKey)) {
+      releasedButtons.push(key);
     }
   }
 
   // TODO: Enable press-and-hold if actOnRelease is on
-  if (actOnRelease) {
-    // Handle button releases
-    releasedButtons.forEach(button => {
-      if (callback) callback(button);
-    });
-  } else {
-    // Handle button presses
-    pressedButtons.forEach(button => {
-      if (callback) callback(button);
-    });
+  if (callback) {
+    // const input = {
+    //   name: button,
+    //   device: "gamepad", // TODO: Get device name
+    // }
+
+    if (actOnRelease) {
+      // Handle button releases
+      releasedButtons.forEach(button => {
+        // callback(button);
+        callback({
+          name: button?.buttonName ?? button,
+          device: button?.deviceName ?? "Gamepad",
+        });
+      });
+    } else {
+      // Handle button presses
+      pressedButtons.forEach(button => {
+        // callback(button);
+        callback({
+          name: button?.buttonName ?? button,
+          device: button?.deviceName ?? "Gamepad",
+        });
+      });
+    }
   }
 
   buttonsLastFrame = currentButtons;
