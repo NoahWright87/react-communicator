@@ -12,19 +12,23 @@ import CommunicatorInputSetup from './CommunicatorInputSetup';
 import { InputHelper } from './InputHelper';
 import ToneJsTest from './ToneJsTest';
 import Experiment from './Experimental/Experiment';
-import { playNotes, speak } from './SoundPlayer';
+import { playNotes, playNotes_new, setBpm, setReverb, setSynthDistortion, setSynthVolume, shiftPitch, speak } from './SoundPlayer';
 import mitt from 'mitt';
+import { furElise, jingleBells, maryHadaLittleLamb, odeToJoy, rowYourBoat, twinkleTwinkle } from './Melodies';
+import { Tone } from 'tone/build/esm/core/Tone';
 
 
-const rumbleWeak = (weak) => rumble(weak.amount, 0);
-const rumbleStrong = (strong) => rumble(0, strong.amount);
+const rumbleWeak = (weak) => rumble(weak.value ?? weak.args ?? 0, 0);
+const rumbleStrong = (strong) => rumble(0, strong.value ?? strong.args ?? 0);
 
 const rumble = (weak, strong) => {
+  console.debug("Rumble", weak, strong);
+
   navigator.getGamepads().forEach(gamepad => {
     if (!gamepad?.vibrationActuator) return;
     gamepad.vibrationActuator.playEffect("dual-rumble", {
       startDelay: 0,
-      duration: 250,
+      duration: 500,
       weakMagnitude: weak,
       strongMagnitude: strong,
     });
@@ -49,100 +53,112 @@ const ttsActions = {
 const createSynthActions = (songList) => {
   return songList.map(song => {
     return {
-      callback: playNotes,
+      callback: playNotes_new,
       args: song
     };
   });
 }
 const synthActions = {
   Music1: createSynthActions([
-    "E4",
-    "E5",
-    "E6",
-    // "E D C D E E E D D D E G G E D C D E E E E D D E D C", // Mary Had a Little Lamb
-    // TODO: Lots more songs
+    maryHadaLittleLamb,
+    jingleBells,
   ]),
   Music2: createSynthActions([
-    "D4",
-    // "E D C D E E E D D D E G G E D C D E E E E D D E D C", // Mary Had a Little Lamb
-    // TODO: Lots more songs
+    rowYourBoat,
+    twinkleTwinkle,
   ]),
   Music3: createSynthActions([
-    "C4",
-    // "E D C D E E E D D D E G G E D C D E E E E D D E D C", // Mary Had a Little Lamb
-    // TODO: Lots more songs
+    odeToJoy,
+    furElise,
   ]),
   Music4: createSynthActions([
-    "B4",
-    // "E D C D E E E D D D E G G E D C D E E E E D D E D C", // Mary Had a Little Lamb
-    // TODO: Lots more songs
+    "C3 C4 C5 C6",
+    "D3 D4 D5 D6",
+    "E3 E4 E5 E6",
+    "F3 F4 F5 F6",
   ]),
-  // TODO: More groups of songs
 }
 
 const setVolume = (volume) => {
-  console.debug("Volume set to " + volume);
+  console.debug("Volume set to ", volume);
+  setSynthVolume(volume.args);
 }
-const volumeOptions = [1.0, 0.8, 0.6, 0.4, 0.2];
-const volumeUp = () => {
-  return volumeOptions.sort((a, b) => a - b).map((volume) => {
-    return {
-      callback: setVolume,
-      args: volume
-    }
-  })
-}
-const volumeDown = () => {
-  return volumeOptions.sort((a, b) => b - a).map((volume) => {
-    return {
-      callback: setVolume,
-      args: volume
-    }
-  })
+const volumeUpActions = [
+  { callback: setVolume, args: 1.0 },
+  { callback: setVolume, args: 1.1 },
+  { callback: setVolume, args: 1.2 },
+  { callback: setVolume, args: 1.3 },
+]
+const volumeDownActions = [
+  { callback: setVolume, args: 1.0 },
+  { callback: setVolume, args: 0.9 },
+  { callback: setVolume, args: 0.8 },
+  { callback: setVolume, args: 0.7 },
+]
+
+
+const setTempo = (input) => {
+  console.debug("Tempo set to ", input);
+  setBpm(input.args);
 }
 
-const tempoOptions = [1.0, 0.8, 0.6, 0.4, 0.2];
-const setTempo = (tempo) => {
-  console.debug("Tempo set to " + tempo);
+const createTempoAction = (tempo) => {
+  return {
+    callback: setTempo,
+    args: tempo
+  }
 }
-const tempoUp = () => {
-  return tempoOptions.sort((a, b) => a - b).map((tempo) => {
-    return {
-      callback: setTempo,
-      args: tempo
-    }
-  })
-}
-const tempoDown = () => {
-  return tempoOptions.sort((a, b) => b - a).map((tempo) => {
-    return {
-      callback: setTempo,
-      args: tempo
-    }
-  })
-}
+const tempoActionUp = [
+  createTempoAction(120),
+  createTempoAction(150),
+  createTempoAction(180),
+  createTempoAction(210),
+  createTempoAction(240),
+]
+const tempoActionDown = [
+  createTempoAction(210),
+  createTempoAction(180),
+  createTempoAction(150),
+  createTempoAction(120),
+  createTempoAction(80),
+]
 
-const pitchOptions = [1.0, 0.8, 0.6, 0.4, 0.2];
-const setPitch = (pitch) => {
-  console.debug("Pitch set to " + pitch);
+const setPitch = (input) => {
+  // Shift pitch by input.args
+  console.debug("Pitch set", input);
+  shiftPitch(input.args);
 }
-const pitchUp = () => {
-  return pitchOptions.sort((a, b) => a - b).map((pitch) => {
-    return {
-      callback: setPitch,
-      args: pitch
-    }
-  })
-}
-const pitchDown = () => {
-  return pitchOptions.sort((a, b) => b - a).map((pitch) => {
-    return {
-      callback: setPitch,
-      args: pitch
-    }
-  })
-}
+const pitchDownActions = [
+  { callback: setPitch, args: 1.0 },
+  { callback: setPitch, args: 0.8 },
+  { callback: setPitch, args: 0.6 },
+  { callback: setPitch, args: 0.4 },
+  { callback: setPitch, args: 0.2 },
+]
+const pitchUpActions = [
+  { callback: setPitch, args: 0.2 },
+  { callback: setPitch, args: 0.4 },
+  { callback: setPitch, args: 0.6 },
+  { callback: setPitch, args: 0.8 },
+  { callback: setPitch, args: 1.0 },
+]
 
+const setDistortion = (input) => {
+  console.debug("Distortion set", input);
+  setSynthDistortion(input.args);
+}
+const setDistortionUpActions = [
+  { callback: setDistortion, args: 0.0 },
+  { callback: setDistortion, args: 0.1 },
+  { callback: setDistortion, args: 0.2 },
+  { callback: setDistortion, args: 0.3 },
+]
+const setDistortionDownActions = [
+  { callback: setDistortion, args: 0.3 },
+  { callback: setDistortion, args: 0.2 },
+  { callback: setDistortion, args: 0.1 },
+  { callback: setDistortion, args: 0.0 },
+]
 
 
 const actionButtonInfo = [
@@ -208,14 +224,14 @@ const actionButtonInfo = [
 
   // Shoulder buttons
   {
-    actions: null,
+    actions: [{callback: speak, args: "Yes"}],
     inputs: [
       "DualShock: B4",
       "Keyboard: Digit9",
     ],
   },
   {
-    actions: null,
+    actions: [{callback: speak, args: "No"}],
     inputs: [
       "DualShock: B5",
       "Keyboard: Digit0",
@@ -249,7 +265,7 @@ const actionButtonInfo = [
 
   // Start/Select/PS
   {
-    actions: null,
+    actions: null, // TODO: Set voice or synth stuff?
     inputs: [
       "DualShock: B8",
       "Keyboard: Minus",
@@ -286,28 +302,28 @@ const actionButtonInfo = [
 
   // Analog sticks
   {
-    actions: pitchUp,
+    actions: pitchUpActions,
     inputs: [
       "DualShock: Axis0+",
       "Keyboard: ArrowUp",
     ],
   },
   {
-    actions: pitchDown,
+    actions: pitchDownActions,
     inputs: [
       "DualShock: Axis0-",
       "Keyboard: ArrowDown",
     ],
   },
   {
-    actions: volumeUp,
+    actions: volumeUpActions,
     inputs: [
       "DualShock: Axis1+",
       "Keyboard: ArrowRight",
     ],
   },
   {
-    actions: volumeDown,
+    actions: volumeDownActions,
     inputs: [
       "DualShock: Axis1-",
       "Keyboard: ArrowLeft",
@@ -315,28 +331,28 @@ const actionButtonInfo = [
   },
 
   {
-    actions: tempoUp,
+    actions: tempoActionUp,
     inputs: [
       "DualShock: Axis2+",
       "Keyboard: KeyW",
     ],
   },
   {
-    actions: tempoDown,
+    actions: tempoActionDown,
     inputs: [
       "DualShock: Axis2-",
       "Keyboard: KeyS",
     ],
   },
   {
-    actions: volumeUp,
+    actions: setDistortionUpActions,
     inputs: [
       "DualShock: Axis3+",
       "Keyboard: KeyD",
     ],
   },
   {
-    actions: volumeDown,
+    actions: setDistortionDownActions,
     inputs: [
       "DualShock: Axis3-",
       "Keyboard: KeyA",
