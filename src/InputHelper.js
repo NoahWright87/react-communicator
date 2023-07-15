@@ -12,8 +12,9 @@ export function InputHelper({ callback }) {
 
     const onInput = (input) => {
         console.debug(input);
-
-        callback(input);
+        if (input?.value ?? 0 > 0) {
+          callback(input);
+        }
     }
 
     // const onInput = (input) => {
