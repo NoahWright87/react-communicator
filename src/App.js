@@ -12,9 +12,9 @@ import CommunicatorInputSetup from './CommunicatorInputSetup';
 import { InputHelper } from './InputHelper';
 import ToneJsTest from './ToneJsTest';
 import Experiment from './Experimental/Experiment';
-import { playNotes, playNotes_new, setBpm, setReverb, setSynthDistortion, setSynthVolume, shiftPitch, speak } from './SoundPlayer';
+import { playNotes, playNotes_new, setActiveSynth, setBpm, setReverb, setSynthDistortion, setSynthVolume, shiftPitch, speak, toggleAudioInterrupt, toggleBeatAssist } from './SoundPlayer';
 import mitt from 'mitt';
-import { furElise, jingleBells, maryHadaLittleLamb, odeToJoy, rowYourBoat, twinkleTwinkle } from './Melodies';
+import { furElise, jingleBells, maryHadaLittleLamb, odeToJoy, rowYourBoat, testMelody, twinkleTwinkle } from './Melodies';
 import { Tone } from 'tone/build/esm/core/Tone';
 
 
@@ -50,18 +50,25 @@ const ttsActions = {
     Mmmm: createTtsActions("Mom magnificently makes many mangy monkeys mini morning mango marmalade marshmallow mega margaritas".split(" ")),
 }
 
-const createSynthActions = (songList) => {
+const createSynthActions = (songList, synthId, trackId) => {
   return songList.map(song => {
     return {
       callback: playNotes_new,
-      args: song
+      args: {
+        notes: song,
+        synthId: synthId,
+        trackId: trackId,
+      }
     };
+    
   });
 }
+
 const synthActions = {
   Music1: createSynthActions([
-    maryHadaLittleLamb,
-    jingleBells,
+    // maryHadaLittleLamb,
+    // jingleBells,
+    testMelody,
   ]),
   Music2: createSynthActions([
     rowYourBoat,
@@ -72,15 +79,30 @@ const synthActions = {
     furElise,
   ]),
   Music4: createSynthActions([
-    "C3 C4 C5 C6",
-    "D3 D4 D5 D6",
-    "E3 E4 E5 E6",
-    "F3 F4 F5 F6",
+    "C3--- C4-- C5- C6",
+    "D3--- D4-- D5- D6",
+    "E3--- E4-- E5- E6",
+    "F3--- F4-- F5- F6",
   ]),
+  Percussion: createSynthActions([
+    "C1---",
+  ],
+  5),
+  Percussion2: createSynthActions([
+    "C2-",
+  ],
+  5),
+  Percussion3: createSynthActions([
+    "F2",
+  ],
+  5),
+  Percussion4: createSynthActions([
+    "F3",
+  ],
+  5),
 }
 
 const setVolume = (volume) => {
-  console.debug("Volume set to ", volume);
   setSynthVolume(volume.args);
 }
 const volumeUpActions = [
@@ -98,7 +120,6 @@ const volumeDownActions = [
 
 
 const setTempo = (input) => {
-  console.debug("Tempo set to ", input);
   setBpm(input.args);
 }
 
@@ -124,8 +145,6 @@ const tempoActionDown = [
 ]
 
 const setPitch = (input) => {
-  // Shift pitch by input.args
-  console.debug("Pitch set", input);
   shiftPitch(input.args);
 }
 const pitchDownActions = [
@@ -144,7 +163,6 @@ const pitchUpActions = [
 ]
 
 const setDistortion = (input) => {
-  console.debug("Distortion set", input);
   setSynthDistortion(input.args);
 }
 const setDistortionUpActions = [
@@ -164,28 +182,48 @@ const setDistortionDownActions = [
 const actionButtonInfo = [
   // Face buttons
   {
-    actions: synthActions.Music1,
+    actions: createSynthActions([
+      "C3/ C3/ C3/ _ C3/ C3/ C3/",
+      "E3/ E3/ E3/ _ E3/ E3/ E3/",
+      "G3/ G3/ G3/ _ G3/ G3/ G3/",
+      "F3/ F3/ F3/ _ F3/ F3/ F3/",
+    ]),
     inputs: [
       "DualShock: B0",
       "Keyboard: Digit1",
     ],
   },
   {
-    actions: synthActions.Music2,
+    actions: createSynthActions([
+      "D4-- D4-- D4--",
+      "F4-- F4-- F4--",
+      "A5-- A5-- A5--",
+      "C5-- C5-- C5--",
+    ]),
     inputs: [
       "DualShock: B1",
       "Keyboard: Digit2",
     ],
   },
   {
-    actions: synthActions.Music3,
+    actions: createSynthActions([
+      "C3// C4// C5// C6//",
+      "E3// E4// E5// E6//",
+      "G3// G4// G5// G6//",
+      "F3// F4// F5// F6//",
+    ]),
     inputs: [
       "DualShock: B2",
       "Keyboard: Digit3",
     ],
   },
   {
-    actions: synthActions.Music4,
+    actions: createSynthActions([
+      "A6// A5// A4// A3//",
+      "B6// B5// B4// B3//",
+      "C6// C5// C4// C3//",
+      "D6// D5// D4// D3//",
+    ]),
     inputs: [
       "DualShock: B3",
       "Keyboard: Digit4",
@@ -194,28 +232,28 @@ const actionButtonInfo = [
 
   // D-pad
   {
-    actions: ttsActions.JJJ,
+    actions: synthActions.Percussion,
     inputs: [
       "DualShock: B12",
       "Keyboard: Digit5",
     ],
   },
   {
-    actions: ttsActions.Shhh,
+    actions: synthActions.Percussion2,
     inputs: [
       "DualShock: B13",
       "Keyboard: Digit6",
     ],
   },
   {
-    actions: ttsActions.ChCh,
+    actions: synthActions.Percussion3,
     inputs: [
       "DualShock: B14",
       "Keyboard: Digit7",
     ],
   },
   {
-    actions: ttsActions.Mmmm,
+    actions: synthActions.Percussion4,
     inputs: [
       "DualShock: B15",
       "Keyboard: Digit8",
@@ -265,21 +303,30 @@ const actionButtonInfo = [
 
   // Start/Select/PS
   {
-    actions: null, // TODO: Set voice or synth stuff?
+    actions: [
+      {callback: toggleAudioInterrupt, args: true},
+      {callback: toggleAudioInterrupt, args: false},
+    ],
     inputs: [
       "DualShock: B8",
       "Keyboard: Minus",
     ],
   },
   {
-    actions: null,
+    actions: [
+      {callback: toggleAudioInterrupt, args: true},
+      {callback: toggleAudioInterrupt, args: false},
+    ],
     inputs: [
       "DualShock: B9",
       "Keyboard: Equal",
     ],
   },
   {
-    actions: null,
+    actions: [
+      {callback: toggleBeatAssist, args: true},
+      {callback: toggleBeatAssist, args: false},
+    ],
     inputs: [
       "DualShock: B16",
       "Keyboard: Enter",
@@ -302,28 +349,32 @@ const actionButtonInfo = [
 
   // Analog sticks
   {
-    actions: pitchUpActions,
+    actions: [{callback: setActiveSynth, args: 0}],
+    // actions: pitchUpActions,
     inputs: [
       "DualShock: Axis0+",
       "Keyboard: ArrowUp",
     ],
   },
   {
-    actions: pitchDownActions,
+    actions: [{callback: setActiveSynth, args: 1}],
+    // actions: pitchDownActions,
     inputs: [
       "DualShock: Axis0-",
       "Keyboard: ArrowDown",
     ],
   },
   {
-    actions: volumeUpActions,
+    actions: [{callback: setActiveSynth, args: 2}],
+    // actions: volumeUpActions,
     inputs: [
       "DualShock: Axis1+",
       "Keyboard: ArrowRight",
     ],
   },
   {
-    actions: volumeDownActions,
+    actions: [{callback: setActiveSynth, args: 3}],
+    // actions: volumeDownActions,
     inputs: [
       "DualShock: Axis1-",
       "Keyboard: ArrowLeft",
@@ -331,28 +382,32 @@ const actionButtonInfo = [
   },
 
   {
-    actions: tempoActionUp,
+    // actions: tempoActionUp,
+    actions: createSynthActions(["F3---"], 5),
     inputs: [
       "DualShock: Axis2+",
       "Keyboard: KeyW",
     ],
   },
   {
-    actions: tempoActionDown,
+    // actions: tempoActionDown,
+    actions: createSynthActions(["E3---"], 5),
     inputs: [
       "DualShock: Axis2-",
       "Keyboard: KeyS",
     ],
   },
   {
-    actions: setDistortionUpActions,
+    // actions: setDistortionUpActions,
+    actions: createSynthActions(["D3---"], 5),
     inputs: [
       "DualShock: Axis3+",
       "Keyboard: KeyD",
     ],
   },
   {
-    actions: setDistortionDownActions,
+    // actions: setDistortionDownActions,
+    actions: createSynthActions(["C3---"], 5),
     inputs: [
       "DualShock: Axis3-",
       "Keyboard: KeyA",
@@ -442,21 +497,21 @@ function App() {
 
     const key = args.device + ": " + args.name;
 
-    actionButtonInfo.forEach(actionButtonInfo => {
-      if (actionButtonInfo.inputs.includes(key)) {
-        if (!actionButtonInfo?.actions?.length) {
+    actionButtonInfo.forEach(abInfo => {
+      if (abInfo.inputs.includes(key)) {
+        if (!abInfo?.actions?.length) {
           console.debug("No actions mapped to button: ", key);
           return;
         }
-        if (actionButtonInfo.currentIndex === undefined) {
-          actionButtonInfo.currentIndex = 0;
+        if (abInfo.currentIndex === undefined) {
+          abInfo.currentIndex = 0;
         }
-        actionButtonInfo.currentIndex = (actionButtonInfo.currentIndex + 1) % actionButtonInfo.actions.length;
+        abInfo.currentIndex = (abInfo.currentIndex + 1) % abInfo.actions.length;
         // actionButtonInfo.actions.forEach(action => {
         //   action.callback({notes: action.args, value: args?.value ?? 0});
         // })
-        actionButtonInfo.actions[actionButtonInfo.currentIndex].callback({
-          args: actionButtonInfo.actions[actionButtonInfo.currentIndex].args, 
+        abInfo.actions[abInfo.currentIndex].callback({
+          args: abInfo.actions[abInfo.currentIndex].args, 
           value: args?.value ?? 0
         });
       }
